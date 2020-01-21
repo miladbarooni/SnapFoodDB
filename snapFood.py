@@ -58,7 +58,3 @@ class SnapFoodDB:
 
     def close(self):
         self._mydb.close()
-
-db = SnapFoodDB()
-db.updateUserProfile("2", email="temp1@gmail.com")
-db.close()
