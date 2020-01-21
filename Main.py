@@ -168,13 +168,33 @@ class Application:
         self.profile = Tk()
         self.profile.title("User Profile")
         self.profile.geometry("700x500")
-        # Show yoru Username
-        Label(self.profile, text="You Username").pack()
-        username_entry = Entry(self.profile)
-        username_entry.pack()
-        username = "hello"
-        username_entry.insert(END, username)
-
+        user_information = mydb.showUser(self.phone_number)
+        print (user_information)
+        # Show your firstname and edit
+        Label(self.profile, text="You FirstName:").pack()
+        firstname_entry = Entry(self.profile)
+        firstname_entry.pack()
+        firstname_entry.insert(END, user_information[0][1])
+        # Show your lastname and edit
+        Label(self.profile, text="You Lastname:").pack()
+        lastname_entry = Entry(self.profile)
+        lastname_entry.pack()
+        lastname_entry.insert(END, user_information[0][2])
+        # Show your phone number and edit
+        Label(self.profile, text="You Phone Number:").pack()
+        phone_number_entry = Entry(self.profile)
+        phone_number_entry.pack()
+        phone_number_entry.insert(END, user_information[0][3])
+        # Show your email address and edit
+        Label(self.profile, text="You email address:").pack()
+        email_address_entry = Entry(self.profile)
+        email_address_entry.pack()
+        email_address_entry.insert(END, user_information[0][4])
+        # Show your password and edit
+        Label(self.profile, text="You Password:").pack()
+        password_entry = Entry(self.profile)
+        password_entry.pack()
+        password_entry.insert(END, user_information[0][4])
     def restaurantsPage(self):
         print ("resturantsPage")
     
