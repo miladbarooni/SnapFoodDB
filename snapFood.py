@@ -30,7 +30,7 @@ class SnapFoodDB:
         self._mycursor.execute("SELECT * FROM USER WHERE `phone-number`=\'{}\'".format(phone_number))
         return self._mycursor.fetchall()
 
-    def updateUserProfile(self, user_id, f_name = "", l_name = "", email = "", phone_number = "", passwd = ""):
+    def updateUserProfile(self, user_id, f_name = "", l_name = "", phone_number = "", email = "", passwd = ""):
         self._mycursor.execute("SELECT * FROM USER WHERE userid=\'{}\'".format(user_id))
         tmp = self._mycursor.fetchall()
         if len(tmp) != 1 :
@@ -45,8 +45,8 @@ class SnapFoodDB:
             email = tmp[0][4]
         if passwd == "" :
             passwd = tmp[0][5]
-        self._mycursor.execute("UPDATE USER SET `first-name` = \'{}\', `last-name` = \'{}\', `phone-number`, email = \'{}\', password = \'{}\' WHERE user_id = \'{}\';"
-        .format(f_name, l_name, email, passwd, phone_number))
+        self._mycursor.execute("UPDATE USER SET `first-name` = \'{}\', `last-name` = \'{}\', `phone-number` = \'{}\', `email` = \'{}\', `password` = \'{}\' WHERE userid = \'{}\';"
+        .format(f_name, l_name, phone_number, email, passwd, user_id))
         self._mydb.commit()
         return "DONE"
 
@@ -60,3 +60,5 @@ class SnapFoodDB:
         self._mydb.close()
 
 db = SnapFoodDB()
+db.updateUserProfile("2", email="temp1@gmail.com")
+db.close()
