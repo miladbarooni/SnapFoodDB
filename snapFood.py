@@ -1,5 +1,7 @@
 import mysql.connector
-from .. import config
+import sys
+sys.path.insert(0, '..')
+from config import *
 
 class SnapFoodDB:
 
@@ -27,7 +29,6 @@ class SnapFoodDB:
     def showUser(self, phone_number):
         self._mycursor.execute("SELECT * FROM USER WHERE `phone-number`=\'{}\'".format(phone_number))
         return self._mycursor.fetchall()
-
 
     def updateUserProfile(self, phone_number, f_name = "", l_name = "", email = "", passwd = ""):
         self._mycursor.execute("SELECT * FROM USER WHERE `phone-number`=\'{}\'".format(phone_number))
