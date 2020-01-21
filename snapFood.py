@@ -1,13 +1,16 @@
 import mysql.connector
+import sys
+sys.path.insert(0, '..')
+from config import *
 
 class SnapFoodDB:
 
     def __init__(self):
         self._mydb = mysql.connector.connect(
-            host = "87.236.212.181",
-            user = "myproject",
-            passwd = "myproject",
-            database = "snapFood"
+            host = host,
+            user = user,
+            passwd = password,
+            database = database
         )
         self._mycursor = self._mydb.cursor()
 
@@ -23,8 +26,12 @@ class SnapFoodDB:
         self._mycursor.execute("SELECT `phone-number`, password FROM USER WHERE `phone-number`=\'{}\'".format(phone_number))
         return self._mycursor.fetchall()
 
+    def showUser(self, phone_number):
+        self._mycursor.execute("SELECT * FROM USER WHERE `phone-number`=\'{}\'".format(phone_number))
+        return self._mycursor.fetchall()
+
     def updateUserProfile(self, phone_number, f_name = "", l_name = "", email = "", passwd = ""):
-        self._mycursor.execute("SELECT * FROM USER WHERE phone-number=\'{}\'".format(phone_number))
+        self._mycursor.execute("SELECT * FROM USER WHERE `phone-number`=\'{}\'".format(phone_number))
         tmp = self._mycursor.fetchall()
         if len(tmp) != 1 :
             return "ERROR"
@@ -36,7 +43,7 @@ class SnapFoodDB:
             email = tmp[0][4]
         if passwd == "" :
             passwd = tmp[0][5]
-        self._mycursor.execute("UPDATE USER SET `first-name` = \'{}\', `last-name` = \'{}\', email = \'{}\', password = \'{}\' WHERE phone-number = \'{}\';"
+        self._mycursor.execute("UPDATE USER SET `first-name` = \'{}\', `last-name` = \'{}\', email = \'{}\', password = \'{}\' WHERE `phone-number` = \'{}\';"
         .format(f_name, l_name, email, passwd, phone_number))
         self._mydb.commit()
         return "DONE"
@@ -49,3 +56,5 @@ class SnapFoodDB:
 
     def close(self):
         self._mydb.close()
+
+db = SnapFoodDB()
