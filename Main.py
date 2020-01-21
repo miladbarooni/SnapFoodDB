@@ -169,7 +169,7 @@ class Application:
         self.profile.title("User Profile")
         self.profile.geometry("700x500")
         user_information = mydb.showUser(self.phone_number)
-        print (user_information)
+        # print (user_information)
         # Show your firstname and edit
         Label(self.profile, text="You FirstName:").pack()
         firstname_entry = Entry(self.profile)
@@ -196,9 +196,17 @@ class Application:
         password_entry.pack()
         password_entry.insert(END, user_information[0][5])
         # Change button
-        Button(self.profile,text="Change my information", height="2", width="30", command=mydb.updateUserProfile
-                                                (user_information[0][0], firstname_entry.get(), lastname_entry.get()
-                                                ,email_address_entry.get(), phone_number_entry.get(),password_entry.get))).pack()
+        Button(self.profile,text="Change my information", height="2", width="30", command=partial(self.updateUserInformation, user_information[0][0],
+                                    firstname_entry, lastname_entry, phone_number_entry, email_address_entry, password_entry)).pack()
+        print (email_address_entry.get())
+
+    def updateUserInformation(self, user_id,firstname_entry, lastname_entry, phone_number_entry, email_address_entry, password_entry):
+        try:
+            mydb.updateUserProfile(user_id, firstname_entry.get(),lastname_entry.get(), phone_number_entry.get(), email_address_entry.get(), password_entry.get()) 
+        except:
+            print ("can't change the information")
+        Label(self.profile, text="Changed seccussful").pack()
+    
     def restaurantsPage(self):
         print ("resturantsPage")
     
