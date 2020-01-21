@@ -194,7 +194,11 @@ class Application:
         Label(self.profile, text="You Password:").pack()
         password_entry = Entry(self.profile)
         password_entry.pack()
-        password_entry.insert(END, user_information[0][4])
+        password_entry.insert(END, user_information[0][5])
+        # Change button
+        Button(self.profile,text="Change my information", height="2", width="30", command=mydb.updateUserProfile
+                                                (user_information[0][0], firstname_entry.get(), lastname_entry.get()
+                                                ,email_address_entry.get(), phone_number_entry.get(),password_entry.get))).pack()
     def restaurantsPage(self):
         print ("resturantsPage")
     
