@@ -20,7 +20,7 @@ class SnapFoodDB:
 
 
     def login(self, phone_number):
-        self._mycursor.execute("SELECT phone-number, password FROM USER WHERE phone-number=\'{}\'".format(phone_number))
+        self._mycursor.execute("SELECT `phone-number`, password FROM USER WHERE `phone-number`=\'{}\'".format(phone_number))
         return self._mycursor.fetchall()
 
     def updateUserProfile(self, phone_number, f_name = "", l_name = "", email = "", passwd = ""):

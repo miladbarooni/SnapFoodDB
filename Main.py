@@ -1,4 +1,4 @@
-from tkinter import Tk, Label, Button, Toplevel, StringVar, Entry, messagebox, Frame
+from tkinter import Tk, Label, Button, Toplevel, StringVar, Entry, messagebox, Frame, END
 from functools import partial
 import tkinter as tk
 from time import sleep
@@ -81,10 +81,10 @@ class Application:
         # self.db_cursor.execute("SELECT userid, password FROM USER WHERE userid=\'{}\'".format(username_login_entry.get()))
        
         user_id = mydb.login(username_login_entry.get())
-        
+        self.phone_number = username_login_entry.get()
         #check whether user_id exists or not
         if (len(user_id) != 0 and user_id[0][1] == password_login_entry.get()):
-            self.master.quit()
+            
             self.dashboardPage()
         else:
             messagebox.showinfo('Username/Password incorrect', 'your username of password is incorrect')
@@ -168,9 +168,12 @@ class Application:
         self.profile = Tk()
         self.profile.title("User Profile")
         self.profile.geometry("700x500")
-        username = "Milad"
-        # First insert 
-        Label(self.profile, text="Username:{}".format(username)).pack()
+        # Show yoru Username
+        Label(self.profile, text="You Username").pack()
+        username_entry = Entry(self.profile)
+        username_entry.pack()
+        username = "hello"
+        username_entry.insert(END, username)
 
     def restaurantsPage(self):
         print ("resturantsPage")
