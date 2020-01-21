@@ -4,10 +4,10 @@ class SnapFoodDB:
 
     def __init__(self):
         self._mydb = mysql.connector.connect(
-            host = "87.236.212.181",
-            user = "myproject",
-            passwd = "myproject",
-            database = "snapFood"
+            host = "host",
+            user = "user",
+            passwd = "pass",
+            database = "database"
         )
         self._mycursor = self._mydb.cursor()
     
@@ -45,7 +45,7 @@ class SnapFoodDB:
         self._mycursor.execute("SELECT ADDRESS.* FROM ADDRESS WHERE USERuserid = \'{}\'".format(user_id))
         return self._mycursor.fetchall()
 
-    # def addAddress(self, city, x, y, )
+    def addAddress(self, city, x, y, )
 
     def close(self):
         self._mydb.close()
