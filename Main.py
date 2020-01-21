@@ -1,4 +1,4 @@
-from tkinter import Tk, Label, Button, Toplevel, StringVar, Entry, messagebox
+from tkinter import Tk, Label, Button, Toplevel, StringVar, Entry, messagebox, Frame
 from functools import partial
 import tkinter as tk
 from time import sleep
@@ -76,13 +76,16 @@ class Application:
         print (username_verify.get())
         Button(self.login_screen, text="Login", width=10, height=1, command = partial(self.loginVerify, username_login_entry, password_login_entry)).pack()
         
+
     def loginVerify(self, username_login_entry, password_login_entry):
         # self.db_cursor.execute("SELECT userid, password FROM USER WHERE userid=\'{}\'".format(username_login_entry.get()))
-        user_id = []
+        self.login_screen.destroy()
+        self.dashboardPage()
+        user_id = mydb.login(username_login_entry.get())
         
         #check whether user_id exists or not
         if (len(user_id) != 0 and user_id[0][1] == password_login_entry.get()):
-            self.master.quit
+            self.master.quit()
             self.dashboardPage()
         else:
             messagebox.showinfo('Username/Password incorrect', 'your username of password is incorrect')
@@ -145,8 +148,38 @@ class Application:
 
 
     def dashboardPage(self):
+        self.master.destroy
+        self.login_screen.destroy
         self.dashboard = Tk()
         self.dashboard.title("User Dashboard")
+        self.dashboard.geometry("300x250")
+
+        Label(self.dashboard, text="Select Your Choice", bg="blue", width="300", height="2", font=("Calibri", 13)).pack()
+        Label(text="").pack()
+        Button(self.dashboard,text="Profile", height="2", width="30", command = self.profilePage).pack()
+        Label(text="").pack()
+        Button(self.dashboard,text="Restaurants", height="2", width="30", command=self.restaurantsPage).pack()
+        Label(text="").pack()
+        Button(self.dashboard,text="Order", height="2", width="30", command=self.orderPage).pack()
+        
+        closeButton = Button(self.dashboard, text="Exit", command=self.dashboard.destroy, width="200", height="2")
+        closeButton.pack()
+
+    def profilePage(self):
+        # self.dashboard.destroy()
+        self.profile = Tk()
+        self.profile.title("User Profile")
+        self.profile.geometry("700x500")
+        # user_information_frame = Frame(self.profile).grid(row=0, column=0)
+        username = "Milad"
+        Label(self.profile, text="Username:{}".format(username)).pack()
+
+    def restaurantsPage(self):
+        print ("resturantsPage")
+    
+    def orderPage(self):
+        print ("orderPage")
+    
 
 
 
