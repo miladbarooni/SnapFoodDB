@@ -4,16 +4,16 @@ class SnapFoodDB:
 
     def __init__(self):
         self._mydb = mysql.connector.connect(
-            host = "host",
-            user = "user",
-            passwd = "pass",
-            database = "database"
+            host = "87.236.212.181",
+            user = "myproject",
+            passwd = "myproject",
+            database = "snapFood"
         )
         self._mycursor = self._mydb.cursor()
-    
+
     def registerUser(self, phone_number, password, f_name = "", l_name = "", email = ""):
         self._mycursor.execute("INSERT INTO WALLET(balance) VALUES (0);")
-        wallet_id = self._mycursor.execute("select LAST_INSERT_ID()")
+        wallet_id = self._mycursor.lastrowid
         self._mycursor.execute("INSERT INTO USER (`first-name`, `last-name`, `phone-number`, email, password, WALLETwalletid) VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\');"
         .format(f_name, l_name, phone_number , email, password, wallet_id))
         self._mydb.commit()
@@ -45,7 +45,7 @@ class SnapFoodDB:
         self._mycursor.execute("SELECT ADDRESS.* FROM ADDRESS WHERE USERuserid = \'{}\'".format(user_id))
         return self._mycursor.fetchall()
 
-    def addAddress(self, city, x, y, )
+    #def addAddress(self, city, x, y)
 
     def close(self):
         self._mydb.close()
