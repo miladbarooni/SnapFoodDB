@@ -20,14 +20,15 @@ class SnapFoodDB:
         self._mycursor.execute("INSERT INTO USER (`first-name`, `last-name`, `phone-number`, email, password, WALLETwalletid) VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\');"
         .format(f_name, l_name, phone_number , email, password, wallet_id))
         self._mydb.commit()
+        return self._mycursor.lastrowid
 
 
     def login(self, phone_number):
-        self._mycursor.execute("SELECT `phone-number`, password FROM USER WHERE `phone-number`=\'{}\'".format(phone_number))
+        self._mycursor.execute("SELECT `phone-number`, password, userid FROM USER WHERE `phone-number`=\'{}\'".format(phone_number))
         return self._mycursor.fetchall()
 
-    def showUser(self, phone_number):
-        self._mycursor.execute("SELECT * FROM USER WHERE `phone-number`=\'{}\'".format(phone_number))
+    def showUser(self, user_id):
+        self._mycursor.execute("SELECT * FROM USER WHERE `userid`=\'{}\'".format(user_id))
         return self._mycursor.fetchall()
 
     def updateUserProfile(self, user_id, f_name = "", l_name = "", phone_number = "", email = "", passwd = ""):
