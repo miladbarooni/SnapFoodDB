@@ -1,4 +1,4 @@
-from tkinter import Tk, Label, Button, Toplevel, StringVar, Entry
+from tkinter import Tk, Label, Button, Toplevel, StringVar, Entry, messagebox
 from functools import partial
 import tkinter as tk
 from time import sleep
@@ -82,17 +82,10 @@ class Application:
         
         #check whether user_id exists or not
         if (len(user_id) != 0 and user_id[0][1] == password_login_entry.get()):
-            login_success_screen = Tk()
-            login_success_screen.title("Success")
-            login_success_screen.geometry("150x100")
-            Label(login_success_screen, text="Login Success").pack()
-            Button(login_success_screen, text="OK", command=login_success_screen.destroy).pack()
+            self.master.quit
+            self.dashboardPage()
         else:
-            user_not_found_screen = Tk()
-            user_not_found_screen.title("Success")
-            user_not_found_screen.geometry("150x100")
-            Label(user_not_found_screen, text="User Not Found, Try Again").pack()
-            Button(user_not_found_screen, text="OK", command=user_not_found_screen.destroy).pack()
+            messagebox.showinfo('Username/Password incorrect', 'your username of password is incorrect')
 
 
     def registerPage(self):
@@ -142,11 +135,22 @@ class Application:
         if (password_entry.get() == repeat_password_entry.get()):
             mydb.registerUser(username_entry.get(), password_entry.get(),firstname_entry.get(), lastname_entry.get(), phone_number_entry.get(), email_entry.get(), 1)
         
+        else:
+            messagebox.showinfo('Repeat password again', 'your repeated password doesn\'n match your entered password, Try Again')
 
         # print (username_entry.get())
         # print (password_entry.get())
         # print (firstname_entry.get())
     
+
+
+    def dashboardPage(self):
+        self.dashboard = Tk()
+        self.dashboard.title("User Dashboard")
+
+
+
+
 
 root = Tk()
 my_gui = Application(root)
