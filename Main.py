@@ -65,7 +65,7 @@ class Application:
         password_verify = StringVar()
 
 
-        Label(self.login_screen, text="Username * ").pack()
+        Label(self.login_screen, text="Phone Numbers * ").pack()
         username_login_entry = Entry(self.login_screen, textvariable=username_verify)
         username_login_entry.pack()
         Label(self.login_screen, text="").pack()
@@ -79,8 +79,7 @@ class Application:
 
     def loginVerify(self, username_login_entry, password_login_entry):
         # self.db_cursor.execute("SELECT userid, password FROM USER WHERE userid=\'{}\'".format(username_login_entry.get()))
-        self.login_screen.destroy()
-        self.dashboardPage()
+       
         user_id = mydb.login(username_login_entry.get())
         
         #check whether user_id exists or not
@@ -100,10 +99,11 @@ class Application:
 
         Label(self.register_screen, text="Please enter details below", bg="blue").pack()
         Label(self.register_screen, text="").pack()
-        #username
-        Label(self.register_screen, text="Username * ").pack()
-        username_entry = Entry(self.register_screen)
-        username_entry.pack()
+
+        #phonenumber
+        Label(self.register_screen, text="Phone Number * ").pack()
+        phone_number_entry = Entry(self.register_screen)
+        phone_number_entry.pack()
         #password
         Label(self.register_screen, text="Password * ").pack()
         password_entry = Entry(self.register_screen,show='*')
@@ -120,24 +120,22 @@ class Application:
         Label(self.register_screen, text="Last Name * ").pack()
         lastname_entry = Entry(self.register_screen)
         lastname_entry.pack()  
-        #phonenumber
-        Label(self.register_screen, text="Phone Number * ").pack()
-        phone_number_entry = Entry(self.register_screen)
-        phone_number_entry.pack()
-        #phonenumber
+        #email address
         Label(self.register_screen, text="Email Address * ").pack()
         email_entry = Entry(self.register_screen)
         email_entry.pack()
 
         Label(self.register_screen, text="").pack()
-        Button(self.register_screen, text="Register", width=10, height=1, bg="blue", command = partial(self.registerUser, username_entry
-                                    ,password_entry, repeat_password_entry, firstname_entry, lastname_entry, email_entry, phone_number_entry)).pack()
+        Button(self.register_screen, text="Register", width=10, height=1, bg="blue", command = partial(self.registerUser,
+                                    phone_number_entry ,password_entry, repeat_password_entry, firstname_entry, lastname_entry, email_entry)).pack()
 
-    def registerUser(self,username_entry ,password_entry, repeat_password_entry, firstname_entry, lastname_entry, email_entry, phone_number_entry):
+
+
+    def registerUser(self ,phone_number_entry, password_entry, repeat_password_entry, firstname_entry, lastname_entry, email_entry):
         #insert into database 
         if (password_entry.get() == repeat_password_entry.get()):
-            mydb.registerUser(username_entry.get(), password_entry.get(),firstname_entry.get(), lastname_entry.get(), phone_number_entry.get(), email_entry.get(), 1)
-        
+            mydb.registerUser( phone_number_entry.get(), password_entry.get(),firstname_entry.get(), lastname_entry.get(), email_entry.get())
+            Label(self.register_screen, text="Register was Seccesful").pack()
         else:
             messagebox.showinfo('Repeat password again', 'your repeated password doesn\'n match your entered password, Try Again')
 
@@ -170,8 +168,8 @@ class Application:
         self.profile = Tk()
         self.profile.title("User Profile")
         self.profile.geometry("700x500")
-        # user_information_frame = Frame(self.profile).grid(row=0, column=0)
         username = "Milad"
+        # First insert 
         Label(self.profile, text="Username:{}".format(username)).pack()
 
     def restaurantsPage(self):
