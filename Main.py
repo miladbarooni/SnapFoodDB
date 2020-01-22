@@ -22,7 +22,7 @@ class Application:
         #Bring the window to the center of screen
         windowWidth = master.winfo_reqwidth()
         windowHeight = master.winfo_reqheight()
-        print("Width",windowWidth,"Height",windowHeight)
+        # print("Width",windowWidth,"Height",windowHeight)
         positionRight = int(master.winfo_screenwidth()/2 - windowWidth/2)
         positionDown = int(master.winfo_screenheight()/2 - windowHeight/2)
         # Positions the window in the center of the page.
@@ -204,6 +204,7 @@ class Application:
         password_entry.pack()
         password_entry.insert(END, user_information[0][5])
         # Change button
+        self.user_id = user_information[0][0]
         Button(self.profile,text="Change my information", height="2", width="30", command=partial(self.updateUserInformation, user_information[0][0],
                                     firstname_entry, lastname_entry, phone_number_entry, email_address_entry, password_entry)).pack()
         print (email_address_entry.get())
@@ -222,9 +223,10 @@ class Application:
         city_combo = Combobox(self.profile)
         city_combo['values']= (1, 2, 3, 4, 5, "Text")
         city_combo.pack()
-        cities =["Shiraz", "Tehran"]
-        for city in cities:
-            Label(self.profile, text=city).pack()
+        addresses = mydb.showAddress(self.user_id)
+        print (addresses)
+        for address in addresses:
+            Label(self.profile, text=address).pack()
         
 
 
