@@ -55,12 +55,19 @@ class SnapFoodDB:
         self._mycursor.execute("SELECT ADDRESS.* FROM ADDRESS WHERE USERuserid = \'{}\'".format(user_id))
         return self._mycursor.fetchall()
 
-    def showCity(self):
+    def showAllCity(self):
         self._mycursor.execute("SELECT * FROM CITY")
         return self._mycursor.fetchall()
 
     def addCity(self, city_name):
+<<<<<<< HEAD
         
+=======
+        data = self.showAllCity()
+        for city in data :
+            if city_name == city[1]:
+                return city[0]
+>>>>>>> 7c3d2a10261e5267dd0ae2a3cc90e225adbe57a3
         self._mycursor.execute("INSERT INTO CITY (name) VALUES (\'{}\');".format(city_name))
         self._mydb.commit()
         return self._mycursor.lastrowid
@@ -74,10 +81,50 @@ class SnapFoodDB:
         self._mydb.commit()
         return address_id
 
+    def searchShopByLocation(self, x, y, radius):
+        self._mycursor.execute("SELECT * FROM LOCATION;")
+        data = self._mycursor.fetchall()
+        sql = "SELECT * FROM SHOP WHERE ADDRESSaddressid IN ("
+        lst = ""
+        for location in data:
+            l_x = int(location[1])
+            l_y = int(location[2])
+            if (l_x - x)^2 + (l_y - y)^2 <= radius^2:
+                if len(lst) == 0 :
+                    lst += str(location[3])
+                else:
+                    lst += (", " + str(location[3]))
+        sql += (lst + ");")
+        self._mycursor.execute(sql)
+        return self._mycursor.fetchall()
+
+    def searchShopByCity(self, city_id):  #NOT CHECKED
+        self._mycursor.execute("SELECT SHOP.* FROM SHOP JOIN ADDRESS ON ADDRESSaddressid = addressid WHERE CITYcityid = \'{}\'"
+        .format(city_id))
+        return self._mycursor.fetchall()
+
+    def showShop(self, shop_id = None): #NOT CHECKED
+        if shop_id == None:
+            self._mycursor.execute("SELECT * FROM SHOP;")
+        else:
+            self._mycursor.execute("SELECT * FROM SHOP WHERE shopid = \'{}\';"
+            .format(shop_id))
+        return self._mycursor.fetchall()
+
+    def showFoodsOfShop(self, shop_id): #NOT CHECKED
+        self._mycursor.execute("SELECT * FROM FOOD WHERE SHOPshopid = \'{}\';".format(shop_id))
+        return self._mycursor.fetchall()
+
+    def showCategoryOfShop(self, shop_id): #NOT CHECKED
+        self._mycursor.execute("SELECT CATEGORY.* FROM CATEGORY JOIN ")
+
     def close(self):
         self._mydb.close()
 
+<<<<<<< HEAD
 db = SnapFoodDB()
 # print(db.addAddress("0", "0", 1, 2, "Pasdaran BLVD.", "Aghaee St.", "22", "Hadis St."))
 # print(db.showAddress(1))
 db.close()
+=======
+>>>>>>> 7c3d2a10261e5267dd0ae2a3cc90e225adbe57a3
