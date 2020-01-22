@@ -60,6 +60,7 @@ class SnapFoodDB:
         return self._mycursor.fetchall()
 
     def addCity(self, city_name):
+        
         self._mycursor.execute("INSERT INTO CITY (name) VALUES (\'{}\');".format(city_name))
         self._mydb.commit()
         return self._mycursor.lastrowid
@@ -77,6 +78,6 @@ class SnapFoodDB:
         self._mydb.close()
 
 db = SnapFoodDB()
-print(db.addAddress("0", "0", 1, 2, "Pasdaran BLVD.", "Aghaee St.", "22", "Hadis St."))
-print(db.showAddress(1))
+# print(db.addAddress("0", "0", 1, 2, "Pasdaran BLVD.", "Aghaee St.", "22", "Hadis St."))
+# print(db.showAddress(1))
 db.close()

@@ -1,4 +1,4 @@
-from tkinter import Tk, Label, Button, Toplevel, StringVar, Entry, messagebox, Frame, END
+from tkinter import Tk, Label, Button, Toplevel, StringVar, Entry, messagebox, Frame, END, Scrollbar, Y, RIGHT
 
 from functools import partial
 import tkinter as tk
@@ -75,17 +75,17 @@ class Application:
         password_login_entry = Entry(self.login_screen, textvariable=password_verify, show= '*')
         password_login_entry.pack()
         Label(self.login_screen, text="").pack()
-        print (username_verify.get())
         Button(self.login_screen, text="Login", width=10, height=1, command = partial(self.loginVerify, username_login_entry, password_login_entry)).pack()
         
 
     def loginVerify(self, username_login_entry, password_login_entry):
         # self.db_cursor.execute("SELECT userid, password FROM USER WHERE userid=\'{}\'".format(username_login_entry.get()))
        
-        user_id = mydb.login(username_login_entry.get())
+        data = mydb.login(username_login_entry.get())
+        self.user_id = data[0][2]
         self.phone_number = username_login_entry.get()
         #check whether user_id exists or not
-        if (len(user_id) != 0 and user_id[0][1] == password_login_entry.get()):
+        if (len(data) != 0 and data[0][1] == password_login_entry.get()):
             
             self.dashboardPage()
         else:
@@ -166,18 +166,30 @@ class Application:
         closeButton.pack()
 
     def profilePage(self):
+        def showAddress():
+            self.current_address_screen = Tk()
+            addresses = mydb.showAddress(self.user_id)
+            print (addresses)
+            for i in range(len(addresses)):
+                Label(self.current_address_screen, text="Address #"+str(i+1)+":").pack()
+                address_str = ""
+                for j in range(1,5):
+                    address_str+= addresses[i][j] + " "
+                Label(self.current_address_screen, text=address_str).pack()
         # self.dashboard.destroy()
         self.profile = Tk()
         self.profile.title("User Profile")
         self.profile.geometry("700x500")
+        
+        
         """
         in this section we will show the user his/her information and he or she can change it 
         ##########################################################3
         """
         Label(self.profile, text="Your information", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
         Label(text="").pack()
-        user_information = mydb.showUser(self.phone_number)
-        # print (user_information)
+        user_information = mydb.showUser(self.user_id)
+        print (user_information)
         # Show your firstname and edit
         Label(self.profile, text="You FirstName:").pack()
         firstname_entry = Entry(self.profile)
@@ -207,7 +219,7 @@ class Application:
         self.user_id = user_information[0][0]
         Button(self.profile,text="Change my information", height="2", width="30", command=partial(self.updateUserInformation, user_information[0][0],
                                     firstname_entry, lastname_entry, phone_number_entry, email_address_entry, password_entry)).pack()
-        print (email_address_entry.get())
+        # print (email_address_entry.get())
         sep1= Separator(self.profile, orient=tk.HORIZONTAL)
         sep1.pack(anchor="nw", fill=tk.X, pady=4)
         """
@@ -218,19 +230,51 @@ class Application:
         in this section we will show the user his/her information and he or she can change it 
         ##########################################################3
         """
-        Label(self.profile, text="Your Current address", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
+        Label(self.profile, text="Your Address", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
         Label(text="").pack()
-        city_combo = Combobox(self.profile)
-        city_combo['values']= (1, 2, 3, 4, 5, "Text")
-        city_combo.pack()
-        addresses = mydb.showAddress(self.user_id)
-        print (addresses)
-        for address in addresses:
-            Label(self.profile, text=address).pack()
+        show_address_button = Button(self.profile, text="Show Current added address", command=showAddress)
+        show_address_button.pack()
+        
+        add_address_button = Button(self.profile, text="Add Address", command=self.addAddress)
+        add_address_button.pack()
         
 
-
-
+    def addAddress(self):
+        def addNewAddress():
+            mydb.addAddress(x_entry.get(), y_entry.get(), self.user_id, city_combo.get(), mydb.addCity(city_combo.get())
+                            ,alley_entry.get(), plaque_entry.get(), other_information_entry.get())
+        self.add_address_screen = Tk()
+        self.add_address_screen.title("Adding new address")
+        self.add_address_screen.geometry("700x500")
+        Label(self.add_address_screen, text="First select your city and then").pack()
+        city_combo = Combobox(self.add_address_screen)
+        cities = mydb.showCity()
+        cities_list = []
+        for i in cities:
+            cities_list.append(i[1])
+        city_combo['values']= cities_list
+        city_combo.pack()
+        Label(self.add_address_screen, text="X:").pack()
+        x_entry = Entry(self.add_address_screen)
+        x_entry.pack()
+        Label(self.add_address_screen, text="Y:").pack()
+        y_entry = Entry(self.add_address_screen)
+        y_entry.pack()
+        Label(self.add_address_screen, text="Street:").pack()
+        street_entry = Entry(self.add_address_screen)
+        street_entry.pack()
+        Label(self.add_address_screen, text="Alley:").pack()
+        alley_entry = Entry(self.add_address_screen)
+        alley_entry.pack()
+        Label(self.add_address_screen, text="Plaque:").pack()
+        plaque_entry = Entry(self.add_address_screen)
+        plaque_entry.pack()
+        Label(self.add_address_screen, text="Other information:").pack()
+        other_information_entry = Entry(self.add_address_screen)
+        other_information_entry.pack()
+        add_address_button = Button(self.add_address_screen, text="Add This New Address", command=addNewAddress)
+        add_address_button.pack()
+            
 
 
     def updateUserInformation(self, user_id,firstname_entry, lastname_entry, phone_number_entry, email_address_entry, password_entry):
