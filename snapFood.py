@@ -55,7 +55,23 @@ class SnapFoodDB:
         self._mycursor.execute("SELECT ADDRESS.* FROM ADDRESS WHERE USERuserid = \'{}\'".format(user_id))
         return self._mycursor.fetchall()
 
-    #def addAddress(self, city, x, y)
+    def showCity(self):
+        self._mycursor.execute("SELECT * FROM CITY")
+        return self._mycursor.fetchall()
+
+    def addCity(self, city_name):
+        self._mycursor.execute("INSERT INTO CITY (name) VALUES (\'{}\');".format(city_name))
+        self._mydb.commit()
+        return self._mycursor.lastrowid
+
+    def addAddress(self, x, y, user_id, city_id, street = "", alley = "", plaque = "", address_text = ""):
+        self._mycursor.execute("INSERT INTO ADDRESS(street, alley, plaque, `address-text`, USERuserid, CITYcityid) VALUES (\'{}\', \'{}\', \'{}\', \'{}\', {}, {});"
+        .format(street, alley, plaque, address_text, user_id, city_id))
+        address_id = self._mycursor.lastrowid
+        self._mycursor.execute("INSERT INTO LOCATION(x, y, ADDRESSaddressid) VALUES (\'{}\', \'{}\', {});"
+        .format(x, y, address_id))
+        return address_id
 
     def close(self):
         self._mydb.close()
+
