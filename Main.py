@@ -1,6 +1,8 @@
 from tkinter import Tk, Label, Button, Toplevel, StringVar, Entry, messagebox, Frame, END
+
 from functools import partial
 import tkinter as tk
+from tkinter.ttk import Separator, Style, Combobox
 from time import sleep
 from snapFood import *
 
@@ -168,6 +170,12 @@ class Application:
         self.profile = Tk()
         self.profile.title("User Profile")
         self.profile.geometry("700x500")
+        """
+        in this section we will show the user his/her information and he or she can change it 
+        ##########################################################3
+        """
+        Label(self.profile, text="Your information", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
+        Label(text="").pack()
         user_information = mydb.showUser(self.phone_number)
         # print (user_information)
         # Show your firstname and edit
@@ -199,6 +207,29 @@ class Application:
         Button(self.profile,text="Change my information", height="2", width="30", command=partial(self.updateUserInformation, user_information[0][0],
                                     firstname_entry, lastname_entry, phone_number_entry, email_address_entry, password_entry)).pack()
         print (email_address_entry.get())
+        sep1= Separator(self.profile, orient=tk.HORIZONTAL)
+        sep1.pack(anchor="nw", fill=tk.X, pady=4)
+        """
+        ########################################################## 
+        """
+        
+        """
+        in this section we will show the user his/her information and he or she can change it 
+        ##########################################################3
+        """
+        Label(self.profile, text="Your Current address", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
+        Label(text="").pack()
+        city_combo = Combobox(self.profile)
+        city_combo['values']= (1, 2, 3, 4, 5, "Text")
+        city_combo.pack()
+        cities =["Shiraz", "Tehran"]
+        for city in cities:
+            Label(self.profile, text=city).pack()
+        
+
+
+
+
 
     def updateUserInformation(self, user_id,firstname_entry, lastname_entry, phone_number_entry, email_address_entry, password_entry):
         try:
@@ -207,6 +238,7 @@ class Application:
             print ("can't change the information")
         Label(self.profile, text="Changed seccussful").pack()
     
+
     def restaurantsPage(self):
         print ("resturantsPage")
     
