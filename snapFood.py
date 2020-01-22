@@ -113,10 +113,7 @@ class SnapFoodDB:
     def close(self):
         self._mydb.close()
 
-<<<<<<< HEAD
 db = SnapFoodDB()
 # print(db.addAddress("0", "0", 1, 2, "Pasdaran BLVD.", "Aghaee St.", "22", "Hadis St."))
 # print(db.showAddress(1))
 db.close()
-=======
->>>>>>> 7c3d2a10261e5267dd0ae2a3cc90e225adbe57a3
