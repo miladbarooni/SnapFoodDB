@@ -1,9 +1,9 @@
 from tkinter import Tk, Label, Button, Toplevel, StringVar, Entry, messagebox, Frame, END, Scrollbar, Y, RIGHT
-from tkinter import Checkbutton, IntVar, BooleanVar
+from tkinter import Checkbutton, IntVar, BooleanVar, TkT
 
 from functools import partial
 import tkinter as tk
-from tkinter.ttk import Separator, Style, Combobox
+from tkinter.ttk import Separator, Style, Combobox, Treeview
 from time import sleep
 from snapFood import *
 
@@ -294,7 +294,11 @@ class Application:
                 if (variable.get()):
                     index = all_variables.index(variable)
                     address_id = all_address[index][0]
-            mydb.searchShopByLocation()
+            resturants = mydb.searchShopByLocation(int(address_id), 10)
+            print (resturants)
+            self.searched_resturant_screen = Tk()
+            self.searched_resturant_screen.title("Results")
+
         self.address_selection_screen = Tk()
         self.address_selection_screen.title("Your addresses")
         self.address_selection_screen.geometry("700x500")
