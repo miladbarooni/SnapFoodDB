@@ -226,6 +226,24 @@ class SnapFoodDB:
         WHERE USER.userid = \'{}\' AND FOOD.SHOPshopid = \'{}\'""".format(user_id, shop_id))
         return self._mycursor.fetchall()
 
+    def searchShop(self, city_id = None, name = None, min_bill_val = -1):  #NOT CHECKED
+        sql = "SELECT SHOP.* FROM SHOP JOIN ADDRESS ON ADDRESSaddressid = addressid WHERE "
+        need_and = 0
+        if city_id != None :
+            sql += ("ADDRESS.CITYcityid = \'{}\'".format(city_id))
+            need_and = 1
+        if name != None :
+            if need_and == 1 :
+                sql += " AND "
+            sql += ("SHOP.name LIKE \'{}%\'".format(name))
+            need_and = 1
+        if min_bill_val != -1:
+            if need_and == 1 :
+                sql += " AND "
+            sql += ("SHOP.minimum-bill-value > \'{}\'".format(min_bill_val))
+        sql += ";"
+        self._mycursor.execute(sql)
+        return self._mycursor.fetchall()
+
     def close(self):
         self._mydb.close()
-
