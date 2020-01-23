@@ -77,7 +77,11 @@ class SnapFoodDB:
         self._mydb.commit()
         return address_id
 
-    def searchShopByLocation(self, x, y, radius):
+    def searchShopByLocation(self, address_id, radius):
+        self._mycursor.execute("SELECT * FROM LOCATION WHERE ADDRESSaddressid = \'{}\';".format(address_id))
+        data = self._mycursor.fetchall()
+        x = data[0][1]
+        y = data[0][2]
         self._mycursor.execute("SELECT * FROM LOCATION;")
         data = self._mycursor.fetchall()
         sql = "SELECT * FROM SHOP WHERE ADDRESSaddressid IN ("
@@ -112,8 +116,68 @@ class SnapFoodDB:
         return self._mycursor.fetchall()
 
     def showCategoryOfShop(self, shop_id): #NOT CHECKED
-        self._mycursor.execute("SELECT CATEGORY.* FROM CATEGORY JOIN ")
+        self._mycursor.execute("SELECT CATEGORY.* FROM (CATEGORY JOIN FOOD ON CATEGORYcategoryid = categoryid WHERE SHOPshopid = \'{}\'"
+        .format(shop_id))
+        return self._mycursor.fetchall()
+
+    def addShopAndAdmin(self, user_name, password, city_id, x, y, shop_name = "", shop_about = "", shop_bill_value = "",
+     street = "", alley = "", plaque = "", address = ""): #NOT CHECKED
+        address_id = self.addAddress(x, y, NULL, city_id, street=street, alley=allay, plaque=plaque, address_text=address)
+        self._mycursor.execute("INSERT INTO SHOP(name, `about-text`, `minimum-bill-value`, ADDRESSaddressid) VALUES (\'{}\', \'{}\', \'{}\', \'{}\');"
+        .format(shop_name, shop_about, shop_bill_value, address_id))
+        shop_id = self._mycursor.lastrowid
+        self._mycursor.execute("INSERT INTO ADMIN(username, password, SHOPshopid) VALUES (?, ?, ?);"
+        .format(user_name, password, shop_id))
+        self._mydb.commit()
+        return self._mycursor.lastrowid
+
+    def addFoodToCart(self, food_id, user_id): #NOT CHECKED
+        self._mycursor.execute("INSERT INTO CART(USERuserid, FOODfoodid) VALUES (\'{}\', \'{}\');"
+        .format(user_id, food_id))
+        self._mydb.commit()
+        return self._mycursor.lastrowid
+
+    def finalizeCart(self, user_id, address_id, discount_code = None): #NOT CHECKED
+        self._mycursor.execute("SELECT FOODfoodid FROM CART WHERE USERuserid = \'{}\';".format(user_id))
+        foods = self._mycursor.fetchall()
+        if discount_code != None :
+            self._mycursor.execute("""SELECT discountid, percent FROM DISCOUNT_USER JOIN DISCOUNT ON discountid = DISCOUNTdiscountid
+             WHERE Useruserid = \'{}\' AND text = \'{}\';""".format(user_id, discount_code))
+            data = self._mycursor.fetchall()
+            if len(data) != 0:
+                discount_id = data[0][0]
+                discount_percent = int(data[0][1])
+            else:
+                discount_id = NULL
+                discount_percent = 0
+        self._mycursor.execute("INSERT INTO STATUS(name) VALUES (\'preparation\');")
+        status_id = self._mycursor.lastrowid
+        self._mycursor.execute("SELECT WALLETwalletid FROM USER WHERE userid = \'{}\';".format(user_id))
+        wallet_id = self._mycursor.fetchall()[0][0]
+        self._mycursor.execute("""INSERT INTO INVOIC(DISCOUNTdiscountid, COMMENTcommentid, STATUSstatusid, ADDRESSaddressid, WALLETwalletid)
+         VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\');""".format(discount_id, NULL, status_id, address_id, wallet_id))
+        invoic_id = self._mycursor.lastrowid
+        total_price = 0
+        for food in foods:
+            self._mycursor.execute("INSERT INTO FOOD_INVOIC(FOODfoodid, INVOICinvoiceid) VALUES (\'{}\', \'{}\');"
+            .format(food[0], invoic_id))
+            self._mycursor.execute("SELECT minimum-bill-value, price FROM SHOP JOIN FOOD ON shopid = SHOPshopid AND foodid = \'{}\'"
+            .format(food[0]))
+            data = self._mycursor.fetchall()
+            price = int(data[0][1])
+            shop_bill_value = int(data[0][0])
+            if shop_bill_value > price - (price * discount_percent):
+                total_price += shop_bill_value
+            else:
+                total_price += price - (price * discount_percent);
+        self._mycursor.execute("SELECT balance FROM WALLET WHERE walletid = \'{}\'".format(wallet_id))
+        balance = int(self._mycursor.fetchall()[0][0])
+        self._mycursor.execute("UPDATE WALLET SET balance = \'{}\' WHERE walletid = \'{}\';".format(balance - total_price, wallet_id))
+        self._mydb.commit()
 
     def close(self):
         self._mydb.close()
 
+db = SnapFoodDB()
+db.finalizeCart()
+db.close()
