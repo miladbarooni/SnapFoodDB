@@ -80,8 +80,8 @@ class SnapFoodDB:
     def searchShopByLocation(self, address_id, radius):
         self._mycursor.execute("SELECT * FROM LOCATION WHERE ADDRESSaddressid = \'{}\';".format(address_id))
         data = self._mycursor.fetchall()
-        x = data[0][1]
-        y = data[0][2]
+        x = int(data[0][1])
+        y = int(data[0][2])
         self._mycursor.execute("SELECT * FROM LOCATION;")
         data = self._mycursor.fetchall()
         sql = "SELECT * FROM SHOP WHERE ADDRESSaddressid IN ("
@@ -122,11 +122,11 @@ class SnapFoodDB:
 
     def addShopAndAdmin(self, user_name, password, city_id, x, y, shop_name = "", shop_about = "", shop_bill_value = "",
      street = "", alley = "", plaque = "", address = ""): #NOT CHECKED
-        address_id = self.addAddress(x, y, NULL, city_id, street=street, alley=allay, plaque=plaque, address_text=address)
+        address_id = self.addAddress(x, y, "", city_id, street=street, alley=alley, plaque=plaque, address_text=address)
         self._mycursor.execute("INSERT INTO SHOP(name, `about-text`, `minimum-bill-value`, ADDRESSaddressid) VALUES (\'{}\', \'{}\', \'{}\', \'{}\');"
         .format(shop_name, shop_about, shop_bill_value, address_id))
         shop_id = self._mycursor.lastrowid
-        self._mycursor.execute("INSERT INTO ADMIN(username, password, SHOPshopid) VALUES (?, ?, ?);"
+        self._mycursor.execute("INSERT INTO ADMIN(username, password, SHOPshopid) VALUES (\'{}\', \'{}\', \'{}\');"
         .format(user_name, password, shop_id))
         self._mydb.commit()
         return self._mycursor.lastrowid
@@ -244,6 +244,9 @@ class SnapFoodDB:
         sql += ";"
         self._mycursor.execute(sql)
         return self._mycursor.fetchall()
+
+    def searchCategory(self, name = None):
+        return
 
     def close(self):
         self._mydb.close()

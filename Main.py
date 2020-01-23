@@ -1,5 +1,5 @@
 from tkinter import Tk, Label, Button, Toplevel, StringVar, Entry, messagebox, Frame, END, Scrollbar, Y, RIGHT
-from tkinter import Checkbutton, IntVar, BooleanVar, TkT
+from tkinter import Checkbutton, IntVar, BooleanVar
 
 from functools import partial
 import tkinter as tk
@@ -169,13 +169,13 @@ class Application:
     def profilePage(self):
         def showAddress():
             self.current_address_screen = Tk()
-            addresses = mydb.showAddress(self.user_id)
+            addresses = mydb.showUserAddress(self.user_id)
             print (addresses)
             for i in range(len(addresses)):
                 Label(self.current_address_screen, text="Address #"+str(i+1)+":").pack()
                 address_str = ""
-                for j in range(1,5):
-                    address_str+= addresses[i][j] + " "
+                for j in range(1,6):
+                    address_str+= addresses[i][j] + ", "
                 Label(self.current_address_screen, text=address_str).pack()
         # self.dashboard.destroy()
         self.profile = Tk()
@@ -289,20 +289,45 @@ class Application:
     
 
     def restaurantsPage(self):
+        style = Style()
+        style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('Calibri', 11)) # Modify the font of the body
+        style.configure("mystyle.Treeview.Heading", font=('Calibri', 13,'bold')) # Modify the font of the headings
+        style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})]) # Remove the borders
+        
         def showRestaurants():
+            def make_address_str(address_id):
+                address_info = mydb.show
+
+            address_id = -1
             for variable in all_variables:
                 if (variable.get()):
                     index = all_variables.index(variable)
                     address_id = all_address[index][0]
-            resturants = mydb.searchShopByLocation(int(address_id), 10)
+            resturants = mydb.searchShopByLocation(int(address_id), 100)
             print (resturants)
             self.searched_resturant_screen = Tk()
             self.searched_resturant_screen.title("Results")
-
+            tree=Treeview(self.searched_resturant_screen,style="mystyle.Treeview")
+            tree["columns"]=("one","two","three")
+            #set tree columns
+            tree.column("#0", width=270, minwidth=270, stretch=tk.NO)
+            tree.column("one", width=150, minwidth=150, stretch=tk.NO)
+            tree.column("two", width=400, minwidth=200)
+            tree.column("three", width=80, minwidth=50, stretch=tk.YES)
+            #set tree's heading
+            tree.heading("#0",text="Name",anchor=tk.W)
+            tree.heading("one", text="About",anchor=tk.W)
+            tree.heading("two", text="min bill value",anchor=tk.W)
+            tree.heading("three", text="address",anchor=tk.W)
+            for i in range(len(resturants)):
+                address_in_treeview = tree.insert("", i+1, "", text=resturants[i][1], values=(resturants[i][2], resturants[i][3], make_address_str(resturants[i][4])))
+            tree.pack()
+            
+        
         self.address_selection_screen = Tk()
         self.address_selection_screen.title("Your addresses")
         self.address_selection_screen.geometry("700x500")
-        all_address = mydb.showAddress(self.user_id)
+        all_address = mydb.showUserAddress(self.user_id)
         print (all_address)
         all_variables = []
 
