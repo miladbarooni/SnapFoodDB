@@ -85,6 +85,12 @@ class SnapFoodDB:
         self._mycursor.execute("DELETE FROM ADDRESS WHERE addressid = \'{}\';".format(address_id))
         self._mydb.commit()
 
+    def updateAddress(self, x = None, y = None, city_id = None, street = None, alley = None, plaque = None, address_text = None):
+        data = self.showAddress(address_id)
+        if x == None:
+            return
+
+
     def searchShopByLocation(self, address_id, radius):
         self._mycursor.execute("SELECT * FROM LOCATION WHERE ADDRESSaddressid = \'{}\';".format(address_id))
         data = self._mycursor.fetchall()
@@ -197,7 +203,7 @@ class SnapFoodDB:
         JOIN STATUS ON STATUSstatusid = statusid)
         JOIN ADDRESS ON ADDRESSaddressid = addressid)
         JOIN WALLET ON WALLETwalletid = walletid)
-        JOIN USER ON WALLET.walletid = USER.WALLETwalletid WHERE USER.userid = \'{}\' AND STATUS.name = \'Completed\'".format(user_id))
+        JOIN USER ON WALLET.walletid = USER.WALLETwalletid WHERE USER.userid = \'{}\' AND STATUS.name = \'Completed\';""".format(user_id))
         return self._mycursor.fetchall()
 
     def addComment(self, invoic_id, rate, text = None): #NOT CHECKED
@@ -209,7 +215,7 @@ class SnapFoodDB:
 
     def showFoods(self, food_ids):  #NOT CHECKED
         """
-            food_ids in a list
+            food_ids is a list
         """
         sql = "SELECT * FROM FOOD WHERE foodid IN ("
         lst = ""
