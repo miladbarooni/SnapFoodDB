@@ -175,6 +175,34 @@ class SnapFoodDB:
         self._mycursor.execute("UPDATE WALLET SET balance = \'{}\' WHERE walletid = \'{}\';".format(balance - total_price, wallet_id))
         self._mydb.commit()
 
+    def showBuyHistory(self, user_id): #NOT CHECKED
+        """
+            invoiceid, DISCOUNT.text, ADDRESSaddressid, FOODfoodid, COMMENT.commentid, STATUS.name
+        """
+        self._mycursor.execute("""SELECT invoiceid, DISCOUNT.text, ADDRESSaddressid, FOODfoodid, COMMENT.commentid, STATUS.name FROM
+        ((((((INVOIC JOIN DISCOUNT ON DISCOUNTdiscountid = discountid)
+        JOIN COMMENT ON COMMENTcomentid = commentid)
+        JOIN (FOOD_INVOIC ON INVOICinvoicid = invoiceid) JOIN FOOD ON FOODfoodid = foodid)
+        JOIN STATUS ON STATUSstatusid = statusid)
+        JOIN ADDRESS ON ADDRESSaddressid = addressid)
+        JOIN WALLET ON WALLETwalletid = walletid)
+        JOIN USER ON WALLET.walletid = USER.WALLETwalletid WHERE USER.userid = \'{}\'""".format(user_id))
+        return self._mycursor.fetchall()
+
+    def addComment(self, invoic_id, rate, text = NULL):
+        self._mycursor.execute("INSERT INTO COMMENT(rate, text) VALUES (\'{}\', \'{}\');".format(rate, text))
+        comment_id = self._mycursor.lastrowid
+        self._mycursor.execute("UPDATE INVOIC SET COMMENTcommentid = \'{}\' WHERE invoiceid = \'{}\';".format(comment_id,invoic_id))
+        self._mydb.commit()
+        return comment_id
+
+    def showFoods(self, food_ids):
+        """
+            food_ids in a list
+        """
+        return
+
+
     def close(self):
         self._mydb.close()
 
