@@ -165,7 +165,7 @@ class SnapFoodDB:
         for food in foods:
             self._mycursor.execute("INSERT INTO FOOD_INVOIC(FOODfoodid, INVOICinvoiceid) VALUES (\'{}\', \'{}\');"
             .format(food[0], invoic_id))
-            self._mycursor.execute("SELECT minimum-bill-value, price FROM SHOP JOIN FOOD ON shopid = SHOPshopid AND foodid = \'{}\'"
+            self._mycursor.execute("SELECT `minimum-bill-value`, price FROM SHOP JOIN FOOD ON shopid = SHOPshopid AND foodid = \'{}\'"
             .format(food[0]))
             data = self._mycursor.fetchall()
             price = int(data[0][1])
