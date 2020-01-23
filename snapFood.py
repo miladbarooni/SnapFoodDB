@@ -154,8 +154,8 @@ class SnapFoodDB:
         status_id = self._mycursor.lastrowid
         self._mycursor.execute("SELECT WALLETwalletid FROM USER WHERE userid = \'{}\';".format(user_id))
         wallet_id = self._mycursor.fetchall()[0][0]
-        self._mycursor.execute("""INSERT INTO INVOIC(DISCOUNTdiscountid, COMMENTcommentid, STATUSstatusid, ADDRESSaddressid, WALLETwalletid)
-         VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\');""".format(discount_id, NULL, status_id, address_id, wallet_id))
+        self._mycursor.execute("""INSERT INTO INVOIC(DISCOUNTdiscountid, COMMENTcommentid, STATUSstatusid, ADDRESSaddressid, WALLETwalletid, `total-price`)
+         VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', 0);""".format(discount_id, NULL, status_id, address_id, wallet_id))
         invoic_id = self._mycursor.lastrowid
         total_price = 0
         for food in foods:
@@ -173,13 +173,15 @@ class SnapFoodDB:
         self._mycursor.execute("SELECT balance FROM WALLET WHERE walletid = \'{}\'".format(wallet_id))
         balance = int(self._mycursor.fetchall()[0][0])
         self._mycursor.execute("UPDATE WALLET SET balance = \'{}\' WHERE walletid = \'{}\';".format(balance - total_price, wallet_id))
+        self._mycursor.execute("UPDATE INVOIC SET `total-price` = \'{}\' WHERE invoicid = \'{}\';".format(total_price, invoic_id))
         self._mydb.commit()
+        return invoic_id
 
     def showBuyHistory(self, user_id): #NOT CHECKED
         """
-            invoiceid, DISCOUNT.text, ADDRESSaddressid, FOODfoodid, COMMENT.commentid, STATUS.name
+            invoiceid, total-price, DISCOUNT.text, ADDRESSaddressid, FOODfoodid, COMMENT.commentid, STATUS.name
         """
-        self._mycursor.execute("""SELECT invoiceid, DISCOUNT.text, ADDRESSaddressid, FOODfoodid, COMMENT.commentid, STATUS.name FROM
+        self._mycursor.execute("""SELECT invoiceid, `total-price`, DISCOUNT.text, ADDRESSaddressid, FOODfoodid, COMMENT.commentid, STATUS.name FROM
         ((((((INVOIC JOIN DISCOUNT ON DISCOUNTdiscountid = discountid)
         JOIN COMMENT ON COMMENTcomentid = commentid)
         JOIN (FOOD_INVOIC ON INVOICinvoicid = invoiceid) JOIN FOOD ON FOODfoodid = foodid)
@@ -189,23 +191,33 @@ class SnapFoodDB:
         JOIN USER ON WALLET.walletid = USER.WALLETwalletid WHERE USER.userid = \'{}\'""".format(user_id))
         return self._mycursor.fetchall()
 
-    def addComment(self, invoic_id, rate, text = NULL):
+    def addComment(self, invoic_id, rate, text = None): #NOT CHECKED
         self._mycursor.execute("INSERT INTO COMMENT(rate, text) VALUES (\'{}\', \'{}\');".format(rate, text))
         comment_id = self._mycursor.lastrowid
         self._mycursor.execute("UPDATE INVOIC SET COMMENTcommentid = \'{}\' WHERE invoiceid = \'{}\';".format(comment_id,invoic_id))
         self._mydb.commit()
         return comment_id
 
-    def showFoods(self, food_ids):
+    def showFoods(self, food_ids):  #NOT CHECKED
         """
             food_ids in a list
         """
-        return
+        sql = "SELECT * FROM FOOD WHERE foodid IN ("
+        lst = ""
+        for food_id in food_ids:
+            if len(lst) == 0:
+                lst += str(food_id)
+            else:
+                lst += (", " + str(food_id))
+        sql += (lst + ");")
+        self._mycursor.execute(sql)
+        return self._mycursor.fetchall()
 
+    def ShowStatus(self, invoic_id):  #NOT CHECKED
+        self._mycursor.execute("SELECT STATUS.name FROM STATUS JOIN INVOICE ON statusid = STATUSstatusid WHERE invoiceid = \'{}\'"
+        .format(invoic_id))
+        return self._mycursor.fetchall()
 
     def close(self):
         self._mydb.close()
 
-db = SnapFoodDB()
-db.finalizeCart()
-db.close()
