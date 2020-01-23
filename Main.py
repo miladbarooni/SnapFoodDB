@@ -413,17 +413,18 @@ class Application:
     def orderPage(self):
         def showHistoryOfOrders():
             print ("show history")
-        def finilizeCart():
+        def finilizeCart(discount_code):
             print (self.address_id)
             mydb.finalizeCart(self.user_id, self.address_id, discount_code.get())
         self.order_screen = Tk()
         self.order_screen.title("Orders Page")
-        Label(self.menu_screen, text="Finilize your Cart", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
+        Label(self.order_screen, text="Finilize your Cart", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
         Label(text="").pack()
         Label(self.order_screen, text="enter your discount code if you have one").pack()
-        discount_code = Entry(self.order_screen).pack()
-        Button(self.order_screen,text="Buy your Cart", height="2", width="30", command=finilizeCart).pack()
-        Label(self.menu_screen, text="Your Orders History", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
+        discount_code = Entry(self.order_screen)
+        discount_code.pack()
+        Button(self.order_screen,text="Buy your Cart", height="2", width="30", command=partial(finilizeCart, discount_code)).pack()
+        Label(self.order_screen, text="Your Orders History", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
         Label(text="").pack()
         Button(self.order_screen,text="history of orders", height="2", width="30", command=showHistoryOfOrders).pack()
 
