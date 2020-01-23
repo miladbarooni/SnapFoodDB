@@ -239,7 +239,7 @@ class SnapFoodDB:
         if name != None :
             if need_and == 1 :
                 sql += " AND "
-            sql += ("SHOP.name LIKE \'{}%\'".format(name))
+            sql += ("SHOP.name LIKE (\'{}%\')".format(name))
             need_and = 1
         if min_bill_val != -1:
             if need_and == 1 :
@@ -249,9 +249,15 @@ class SnapFoodDB:
         self._mycursor.execute(sql)
         return self._mycursor.fetchall()
 
-    def searchCategory(self, name = None): #NOT CHECKED
-        sql = "SELECT "
-        return
+    def searchCategory(self, name = None):
+        sql = "SELECT * FROM CATEGORY "
+        if name != None:
+            sql += ("WHERE name LIKE (\'{}%\')".format(name))
+        sql += ";"
+        self._mycursor.execute(sql)
+        return self._mycursor.fetchall()
+
+    def searchFood(): 
 
     def addFood(self, price, about, name, discount, category_id, shop_id, image = ""):
         self._mycursor.execute("""INSERT INTO FOOD(price, about, name, discount, image, CATEGORYcategoryid, SHOPshopid) 
@@ -265,9 +271,6 @@ class SnapFoodDB:
         self._mydb.commit()
         return self._mycursor.lastrowid
 
+
     def close(self):
         self._mydb.close()
-
-db = SnapFoodDB()
-print(db.showAddress(8))
-db.close()
