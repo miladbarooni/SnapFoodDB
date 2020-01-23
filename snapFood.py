@@ -81,6 +81,10 @@ class SnapFoodDB:
         self._mydb.commit()
         return address_id
 
+    def deletAddress(self, address_id):
+        self._mycursor.execute("DELETE FROM ADDRESS WHERE addressid = \'{}\';".format(address_id))
+        self._mydb.commit()
+
     def searchShopByLocation(self, address_id, radius):
         self._mycursor.execute("SELECT * FROM LOCATION WHERE ADDRESSaddressid = \'{}\';".format(address_id))
         data = self._mycursor.fetchall()
@@ -163,8 +167,9 @@ class SnapFoodDB:
         invoic_id = self._mycursor.lastrowid
         total_price = 0
         for food in foods:
-            self._mycursor.execute("INSERT INTO FOOD_INVOIC VALUES (\'{}\', \'{}\');"
+            self._mycursor.execute("INSERT INTO FOOD_INVOIC (FOODfoodid, INVOICinvoiceid) VALUES (\'{}\', \'{}\');"
             .format(food[0], invoic_id))
+            self._mycursor.execute("DELETE FROM CART WHERE USERuserid = \'{}\' AND FOODfoodid = \'{}\';".format(user_id,food[0]))
             self._mycursor.execute("SELECT `minimum-bill-value`, price FROM SHOP JOIN FOOD ON shopid = SHOPshopid AND foodid = \'{}\'"
             .format(food[0]))
             data = self._mycursor.fetchall()
@@ -177,7 +182,7 @@ class SnapFoodDB:
         self._mycursor.execute("SELECT balance FROM WALLET WHERE walletid = \'{}\'".format(wallet_id))
         balance = int(self._mycursor.fetchall()[0][0])
         self._mycursor.execute("UPDATE WALLET SET balance = \'{}\' WHERE walletid = \'{}\';".format(balance - total_price, wallet_id))
-        self._mycursor.execute("UPDATE INVOIC SET `total-price` = \'{}\' WHERE invoicid = \'{}\';".format(total_price, invoic_id))
+        self._mycursor.execute("UPDATE INVOIC SET `total-price` = \'{}\' WHERE invoiceid = \'{}\';".format(total_price, invoic_id))
         self._mydb.commit()
         return invoic_id
 
@@ -192,13 +197,13 @@ class SnapFoodDB:
         JOIN STATUS ON STATUSstatusid = statusid)
         JOIN ADDRESS ON ADDRESSaddressid = addressid)
         JOIN WALLET ON WALLETwalletid = walletid)
-        JOIN USER ON WALLET.walletid = USER.WALLETwalletid WHERE USER.userid = \'{}\'""".format(user_id))
+        JOIN USER ON WALLET.walletid = USER.WALLETwalletid WHERE USER.userid = \'{}\' AND STATUS.name = \'Completed\'".format(user_id))
         return self._mycursor.fetchall()
 
     def addComment(self, invoic_id, rate, text = None): #NOT CHECKED
         self._mycursor.execute("INSERT INTO COMMENT(rate, text) VALUES (\'{}\', \'{}\');".format(rate, text))
         comment_id = self._mycursor.lastrowid
-        self._mycursor.execute("UPDATE INVOIC SET COMMENTcommentid = \'{}\' WHERE invoiceid = \'{}\';".format(comment_id,invoic_id))
+        self._mycursor.execute("UPDATE INVOIC SET COMMENTcommentid = \'{}\' WHERE invoiceid = \'{}\';""".format(comment_id,invoic_id))
         self._mydb.commit()
         return comment_id
 
@@ -326,11 +331,12 @@ class SnapFoodDB:
         return discount_id
 
     def temp(self):
-        self._mycursor.execute("ALTER TABLE `DISCOUNT-USER` ADD `discount-userid` int(11) ")
+        return
+        #self._mycursor.execute("ALTER TABLE `FOOD_INVOIC` ADD `food-invoicid` int(11)")
+        #self._mycursor.execute("ALTER TABLE `FOOD_INVOIC` DROP PRIMARY KEY, ADD PRIMARY KEY (`food-invoicid`);")
+        #self._mycursor.execute("ALTER TABLE `FOOD_INVOIC` MODIFY `food-invoicid` int(11) NOT NULL AUTO_INCREMENT;")
+        #self._mycursor.execute("ALTER TABLE FOOD_INVOIC ADD CONSTRAINT `is in` FOREIGN KEY (FOODfoodid) REFERENCES FOOD (foodid);")
+        #self._mycursor.execute("ALTER TABLE FOOD_INVOIC ADD CONSTRAINT `is in` FOREIGN KEY (INVOICinvoiceid) REFERENCES INVOIC (invoiceid);")
 
     def close(self):
         self._mydb.close()
-
-db = SnapFoodDB()
-print(db.addDiscountCodeForUser(4, "opening"))
-db.close()
