@@ -60,6 +60,10 @@ class SnapFoodDB:
         return self._mycursor.fetchall()
 
     def addCity(self, city_name):
+        data = self.showAllCity()
+        for city in data :
+            if city_name == city[1]:
+                return city[0]
         self._mycursor.execute("INSERT INTO CITY (name) VALUES (\'{}\');".format(city_name))
         self._mydb.commit()
         return self._mycursor.lastrowid

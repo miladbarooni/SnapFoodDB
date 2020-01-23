@@ -1,5 +1,4 @@
 from tkinter import Tk, Label, Button, Toplevel, StringVar, Entry, messagebox, Frame, END, Scrollbar, Y, RIGHT
-from tkinter import Checkbutton, IntVar, BooleanVar
 
 from functools import partial
 import tkinter as tk
@@ -289,30 +288,8 @@ class Application:
     
 
     def restaurantsPage(self):
-        def showRestaurants():
-            for variable in all_variables:
-                if (variable.get()):
-                    index = all_variables.index(variable)
-                    address_id = all_address[index][0]
-            mydb.searchShopByLocation()
         self.address_selection_screen = Tk()
         self.address_selection_screen.title("Your addresses")
-        self.address_selection_screen.geometry("700x500")
-        all_address = mydb.showAddress(self.user_id)
-        print (all_address)
-        all_variables = []
-
-        list_of_address_str = []
-        for address in all_address:
-            address_str = ""
-            for part in address[1:-2]:
-                address_str += str(part) + ", "
-                list_of_address_str.append(address_str)
-            vari = IntVar(self.address_selection_screen)
-            all_variables.append(vari)
-            Checkbutton(self.address_selection_screen, text=address_str, variable=vari).pack()        
-        Button(self.address_selection_screen, text="Submit", command=showRestaurants).pack()
-
         
         
     
@@ -322,6 +299,11 @@ class Application:
         self.order_screen = Tk()
         self.order_screen.title("Orders Page")
         Button(self.order_screen,text="history of orders", height="2", width="30", command=showHistoryOfOrders).pack()
+    
+
+
+
+
 
 root = Tk()
 my_gui = Application(root)
