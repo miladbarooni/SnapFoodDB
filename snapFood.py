@@ -163,7 +163,7 @@ class SnapFoodDB:
         invoic_id = self._mycursor.lastrowid
         total_price = 0
         for food in foods:
-            self._mycursor.execute("INSERT INTO FOOD_INVOIC VALUES (\'{}\', \'{}\');"
+            self._mycursor.execute("INSERT INTO FOOD_INVOIC(FOODfoodid, INVOICinvoiceid) VALUES (\'{}\', \'{}\');"
             .format(food[0], invoic_id))
             self._mycursor.execute("SELECT `minimum-bill-value`, price FROM SHOP JOIN FOOD ON shopid = SHOPshopid AND foodid = \'{}\'"
             .format(food[0]))
@@ -324,9 +324,6 @@ class SnapFoodDB:
         self._mycursor.execute("INSERT INTO DISCOUNT_USER(DISCOUNTdiscountid, USERuserid) VALUES (\'{}\', \'{}\');".format(discount_id, user_id))
         self._mydb.commit()
         return discount_id
-
-    def temp(self):
-        self._mycursor.execute("ALTER TABLE `DISCOUNT-USER` ADD `discount-userid` int(11) ")
 
     def close(self):
         self._mydb.close()
