@@ -412,7 +412,8 @@ class Application:
     
     def orderPage(self):
         def showHistoryOfOrders():
-            print ("show history")
+            history_of_orders = mydb.showBuyHistory(self.user_id)
+            print (history_of_orders)
         def finilizeCart(discount_code):
             print (self.address_id)
             mydb.finalizeCart(self.user_id, self.address_id, discount_code.get())

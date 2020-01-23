@@ -167,11 +167,7 @@ class SnapFoodDB:
         invoic_id = self._mycursor.lastrowid
         total_price = 0
         for food in foods:
-<<<<<<< HEAD
-            self._mycursor.execute("INSERT INTO FOOD_INVOIC(FOODfoodid, INVOICinvoiceid) VALUES (\'{}\', \'{}\');"
-=======
             self._mycursor.execute("INSERT INTO FOOD_INVOIC (FOODfoodid, INVOICinvoiceid) VALUES (\'{}\', \'{}\');"
->>>>>>> bc279458a0ea8c7cacef0b0095a7b4fbacce9647
             .format(food[0], invoic_id))
             self._mycursor.execute("DELETE FROM CART WHERE USERuserid = \'{}\' AND FOODfoodid = \'{}\';".format(user_id,food[0]))
             self._mycursor.execute("SELECT `minimum-bill-value`, price FROM SHOP JOIN FOOD ON shopid = SHOPshopid AND foodid = \'{}\'"
@@ -334,8 +330,6 @@ class SnapFoodDB:
         self._mydb.commit()
         return discount_id
 
-<<<<<<< HEAD
-=======
     def temp(self):
         return
         #self._mycursor.execute("ALTER TABLE `FOOD_INVOIC` ADD `food-invoicid` int(11)")
@@ -344,6 +338,5 @@ class SnapFoodDB:
         #self._mycursor.execute("ALTER TABLE FOOD_INVOIC ADD CONSTRAINT `is in` FOREIGN KEY (FOODfoodid) REFERENCES FOOD (foodid);")
         #self._mycursor.execute("ALTER TABLE FOOD_INVOIC ADD CONSTRAINT `is in` FOREIGN KEY (INVOICinvoiceid) REFERENCES INVOIC (invoiceid);")
 
->>>>>>> bc279458a0ea8c7cacef0b0095a7b4fbacce9647
     def close(self):
         self._mydb.close()
