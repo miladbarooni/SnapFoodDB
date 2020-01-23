@@ -102,12 +102,12 @@ class SnapFoodDB:
         self._mycursor.execute(sql)
         return self._mycursor.fetchall()
 
-    def searchShopByCity(self, city_id):  #NOT CHECKED
+    def searchShopByCity(self, city_id):
         self._mycursor.execute("SELECT SHOP.* FROM SHOP JOIN ADDRESS ON ADDRESSaddressid = addressid WHERE CITYcityid = \'{}\'"
         .format(city_id))
         return self._mycursor.fetchall()
 
-    def showShop(self, shop_id = None): #NOT CHECKED
+    def showShop(self, shop_id = None):
         if shop_id == None:
             self._mycursor.execute("SELECT * FROM SHOP;")
         else:
@@ -115,12 +115,12 @@ class SnapFoodDB:
             .format(shop_id))
         return self._mycursor.fetchall()
 
-    def showFoodsOfShop(self, shop_id): #NOT CHECKED
+    def showFoodsOfShop(self, shop_id):
         self._mycursor.execute("SELECT * FROM FOOD WHERE SHOPshopid = \'{}\';".format(shop_id))
         return self._mycursor.fetchall()
 
-    def showCategoryOfShop(self, shop_id): #NOT CHECKED
-        self._mycursor.execute("SELECT CATEGORY.* FROM (CATEGORY JOIN FOOD ON CATEGORYcategoryid = categoryid WHERE SHOPshopid = \'{}\'"
+    def showCategoryOfShop(self, shop_id):
+        self._mycursor.execute("SELECT CATEGORY.* FROM CATEGORY JOIN FOOD ON FOOD.CATEGORYcategoryid = CATEGORY.categoryid WHERE SHOPshopid = \'{}\';"
         .format(shop_id))
         return self._mycursor.fetchall()
 
@@ -135,7 +135,7 @@ class SnapFoodDB:
         self._mydb.commit()
         return self._mycursor.lastrowid
 
-    def addFoodToCart(self, food_id, user_id): #NOT CHECKED
+    def addFoodToCart(self, food_id, user_id):
         self._mycursor.execute("INSERT INTO CART(USERuserid, FOODfoodid) VALUES (\'{}\', \'{}\');"
         .format(user_id, food_id))
         self._mydb.commit()
@@ -152,14 +152,14 @@ class SnapFoodDB:
                 discount_id = data[0][0]
                 discount_percent = int(data[0][1])
             else:
-                discount_id = NULL
+                discount_id = 'NULL'
                 discount_percent = 0
         self._mycursor.execute("INSERT INTO STATUS(name) VALUES (\'preparation\');")
         status_id = self._mycursor.lastrowid
         self._mycursor.execute("SELECT WALLETwalletid FROM USER WHERE userid = \'{}\';".format(user_id))
         wallet_id = self._mycursor.fetchall()[0][0]
         self._mycursor.execute("""INSERT INTO INVOIC(DISCOUNTdiscountid, COMMENTcommentid, STATUSstatusid, ADDRESSaddressid, WALLETwalletid, `total-price`)
-         VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', 0);""".format(discount_id, NULL, status_id, address_id, wallet_id))
+         VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', 0);""".format(discount_id, "NULL", status_id, address_id, wallet_id))
         invoic_id = self._mycursor.lastrowid
         total_price = 0
         for food in foods:
@@ -230,8 +230,10 @@ class SnapFoodDB:
         WHERE USER.userid = \'{}\' AND FOOD.SHOPshopid = \'{}\'""".format(user_id, shop_id))
         return self._mycursor.fetchall()
 
-    def searchShop(self, city_id = None, name = None, min_bill_val = -1):  #NOT CHECKED
-        sql = "SELECT SHOP.* FROM SHOP JOIN ADDRESS ON ADDRESSaddressid = addressid WHERE "
+    def searchShop(self, city_id = None, name = None, min_bill_val = -1):
+        sql = "SELECT SHOP.* FROM SHOP JOIN ADDRESS ON ADDRESSaddressid = addressid"
+        if city_id != None or name != None or min_bill_val != -1 :
+            sql += " WHERE "
         need_and = 0
         if city_id != None :
             sql += ("ADDRESS.CITYcityid = \'{}\'".format(city_id))
@@ -239,7 +241,7 @@ class SnapFoodDB:
         if name != None :
             if need_and == 1 :
                 sql += " AND "
-            sql += ("SHOP.name LIKE \'{}%\'".format(name))
+            sql += ("SHOP.name LIKE (\'{}%\')".format(name))
             need_and = 1
         if min_bill_val != -1:
             if need_and == 1 :
@@ -249,9 +251,51 @@ class SnapFoodDB:
         self._mycursor.execute(sql)
         return self._mycursor.fetchall()
 
-    def searchCategory(self, name = None): #NOT CHECKED
-        sql = "SELECT "
-        return
+    def searchCategory(self, name = None):
+        sql = "SELECT * FROM CATEGORY "
+        if name != None:
+            sql += ("WHERE name LIKE (\'{}%\')".format(name))
+        sql += ";"
+        self._mycursor.execute(sql)
+        return self._mycursor.fetchall()
+
+    def searchFood(self, price_l = None, price_h = None, about = None, name = None, discount = None, category = None): 
+        sql = """SELECT FOOD.foodid, FOOD.name, FOOD.price, FOOD.about, FOOD.discount, CATEGORY.name, SHOP.name, SHOP.shopid FROM 
+        (FOOD JOIN CATEGORY ON FOOD.CATEGORYcategoryid = CATEGORY.categoryid) JOIN SHOP ON FOOD.SHOPshopid = SHOP.shopid """
+        need_and = 0
+        if price_l != None or price_h != None or about != None or name != None or discount != None or category != None:
+            sql += "WHERE "
+        if price_l != None:
+            sql += ("FOOD.price >= \'{}\'".format(price_l))
+            need_and = 1
+        if price_h != None:
+            if need_and == 1:
+                sql += " AND "
+            sql += ("FOOD.price <= \'{}\'".format(price_h))
+            need_and = 1
+        if about != None:
+            if need_and == 1:
+                sql += " AND "
+            sql += ("FOOD.about LIKE (\'%{}%\')".format(about))
+            need_and = 1
+        if name != None:
+            if need_and ==1:
+                sql += " AND "
+            sql += ("FOOD.name LIKE (\'{}%\')".format(name))
+            need_and = 1
+        if discount != None:
+            if need_and == 1:
+                sql += " AND "
+            sql += ("FOOD.discount = \'{}\'".format(discount))
+            need_and = 1
+        if category != None:
+            if need_and == 1:
+                sql += " AND "
+            sql += ("CATEGORY.name = \'{}\'".format(category))
+        sql += ";"
+        self._mycursor.execute(sql)
+        return self._mycursor.fetchall()
+
 
     def addFood(self, price, about, name, discount, category_id, shop_id, image = ""):
         self._mycursor.execute("""INSERT INTO FOOD(price, about, name, discount, image, CATEGORYcategoryid, SHOPshopid) 
@@ -263,11 +307,27 @@ class SnapFoodDB:
     def addCategory(self, name):
         self._mycursor.execute("INSERT INTO CATEGORY(name) VALUES (\'{}\');".format(name))
         self._mydb.commit()
-        return self._mycursor.lastrowid
+        return self._mycursor.lastrowid 
+
+    def shopOfCategory(self, catrgory_id):
+        self._mycursor.execute("SELECT SHOP.* FROM SHOP JOIN FOOD ON FOOD.SHOPshopid = SHOP.shopid WHERE FOOD.CATEGORYcategoryid = \'{}\'"
+        .format(catrgory_id))
+        return self._mycursor.fetchall()
+
+    def showCategoryName(self, category_id):
+        self._mycursor.execute("SELECT name FROM CATEGORY WHERE categoryid = \'{}\';".format(category_id))
+        return self._mycursor.fetchall()
+
+    def addDiscountCodeForUser(self, user_id, code, percent=50):
+        self._mycursor.execute("INSERT INTO DISCOUNT(`percent`, text) VALUES (\'{}\', \'{}\');".format(percent, code))
+        discount_id = self._mycursor.lastrowid
+        self._mycursor.execute("INSERT INTO DISCOUNT_USER(DISCOUNTdiscountid, USERuserid) VALUES (\'{}\', \'{}\');".format(discount_id, user_id))
+        self._mydb.commit()
+        return discount_id
 
     def close(self):
         self._mydb.close()
 
 db = SnapFoodDB()
-print(db.showAddress(8))
+print(db.addDiscountCodeForUser(4, "opening"))
 db.close()
