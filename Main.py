@@ -296,7 +296,7 @@ class Application:
         
         def showRestaurants():
             def make_address_str(address_id):
-                address_info = mydb.show
+                address_info = mydb.showAddre
 
             address_id = -1
             for variable in all_variables:

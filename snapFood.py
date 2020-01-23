@@ -51,8 +51,12 @@ class SnapFoodDB:
         self._mydb.commit()
         return "DONE"
 
-    def showAddress(self, user_id) :
-        self._mycursor.execute("SELECT ADDRESS.* FROM ADDRESS WHERE USERuserid = \'{}\'".format(user_id))
+    def showUserAddress(self, user_id) :
+        self._mycursor.execute("SELECT CITY.name, ADDRESS.* FROM ADDRESS JOIN CITY ON ADDRESS.CITYcityid = CITY.cityid WHERE ADDRESS.USERuserid = \'{}\'".format(user_id))
+        return self._mycursor.fetchall()
+
+    def showAddress(self, address_id):
+        self._mycursor.execute("SELECT CITY.name, ADDRESS.* FROM ADDRESS JOIN CITY ON ADDRESS.CITYcityid = CITY.cityid WHERE addressid = \'{}\'".format(address_id))
         return self._mycursor.fetchall()
 
     def showAllCity(self):
@@ -121,7 +125,7 @@ class SnapFoodDB:
         return self._mycursor.fetchall()
 
     def addShopAndAdmin(self, user_name, password, city_id, x, y, shop_name = "", shop_about = "", shop_bill_value = "",
-     street = "", alley = "", plaque = "", address = ""): #NOT CHECKED
+     street = "", alley = "", plaque = "", address = ""):
         address_id = self.addAddress(x, y, "", city_id, street=street, alley=alley, plaque=plaque, address_text=address)
         self._mycursor.execute("INSERT INTO SHOP(name, `about-text`, `minimum-bill-value`, ADDRESSaddressid) VALUES (\'{}\', \'{}\', \'{}\', \'{}\');"
         .format(shop_name, shop_about, shop_bill_value, address_id))
@@ -245,8 +249,25 @@ class SnapFoodDB:
         self._mycursor.execute(sql)
         return self._mycursor.fetchall()
 
-    def searchCategory(self, name = None):
+    def searchCategory(self, name = None): #NOT CHECKED
+        sql = "SELECT "
         return
+
+    def addFood(self, price, about, name, discount, category_id, shop_id, image = ""):
+        self._mycursor.execute("""INSERT INTO FOOD(price, about, name, discount, image, CATEGORYcategoryid, SHOPshopid) 
+        VALUES (\'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\', \'{}\');"""
+        .format(price, about, name, discount, image, category_id, shop_id))
+        self._mydb.commit()
+        return self._mycursor.lastrowid
+
+    def addCategory(self, name):
+        self._mycursor.execute("INSERT INTO CATEGORY(name) VALUES (\'{}\');".format(name))
+        self._mydb.commit()
+        return self._mycursor.lastrowid
 
     def close(self):
         self._mydb.close()
+
+db = SnapFoodDB()
+print(db.showAddress(8))
+db.close()
