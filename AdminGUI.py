@@ -178,6 +178,7 @@ class Application:
 
         Button(self.dashboard_screen,text="Show all Foods", height="2", width="30", command=self.showFoods).pack()
         Label(text="").pack()
+        Button(self.dashboard_screen,text="Edit Current Foods", height="2", width="30", command=self.editFood).pack()
         Button(self.dashboard_screen,text="Add food", height="2", width="30", command=self.addFood).pack()
         Button(self.dashboard_screen,text="Preparing orders", height="2", width="30", command=self.preparingOrders).pack()
         Button(self.dashboard_screen,text="All Compelete orders", height="2", width="30", command=self.allOrders).pack()
@@ -186,6 +187,51 @@ class Application:
         closeButton = Button(self.dashboard_screen, text="Exit", command=self.dashboard_screen.destroy, width="200", height="2")
         closeButton.pack()
 
+    def editFood(self):
+        def updateFood(food_id, price_entry, about_entry,city_combo, discount_entry, name_entry):
+            if (city_combo.get() == ""):
+                cat_id = ""
+            else:
+                cat_id = int(city_combo.get()[0])
+            mydb.updateFood(food_id, price_entry.get(), about_entry.get(), name_entry.get(), discount_entry.get(),cat_id,"")
+        foods = mydb.showFoodsOfShop(self.shop_id)
+        print (foods)
+        self.edit_food_screen = Tk()
+        self.edit_food_screen.title("Edit Food")
+        for i in range(len(foods)):
+            Label(self.edit_food_screen, text="Food#"+str(i+1)).pack()
+            # show price
+            Label(self.edit_food_screen, text="Food Price:").pack()
+            price_entry = Entry(self.edit_food_screen)
+            price_entry.pack()
+            # Show about
+            Label(self.edit_food_screen, text="Food About:").pack()
+            about_entry = Entry(self.edit_food_screen)
+            about_entry.pack()
+            # Show categori
+            Label(self.edit_food_screen, text="Choose a Categori").pack()
+            city_combo = Combobox(self.edit_food_screen)
+            cities = mydb.showAllCategory()
+            cities_list = []
+            print(cities)
+            for city in cities:
+                cities_list.append(str(city[0]) + " " +city[1])
+            
+            city_combo['values']= cities_list
+            city_combo.pack()
+            # Show discount
+            Label(self.edit_food_screen, text="Food Discount:").pack()
+            discount_entry = Entry(self.edit_food_screen)
+            discount_entry.pack()
+            # Show food Name
+            Label(self.edit_food_screen, text="Food Name:").pack()
+            name_entry = Entry(self.edit_food_screen)
+            name_entry.pack()
+
+            # Change button
+            Button(self.edit_food_screen,text="Change my information", height="2", width="30", command=
+            partial(updateFood, foods[i][0], price_entry, about_entry,city_combo, discount_entry, name_entry)).pack()
+            # print (email_address_entry.get())
 
     def registerUser(self ,phone_number_entry, password_entry, repeat_password_entry, firstname_entry, lastname_entry, email_entry):
         #insert into database 

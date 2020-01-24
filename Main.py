@@ -423,7 +423,7 @@ class Application:
 
 
     def editAddresses(self):
-        def updateAddress(i, x_entry, y_entry,city_combo, street_etnry, alley_entry, plaque_entry, address_text_entry):
+        def updateAddress(i, x_entry, y_entry,city_combo, street_entry, alley_entry, plaque_entry, address_text_entry):
 
             x = x_entry.get()
             if (x_entry.get() == ""):
@@ -437,13 +437,13 @@ class Application:
                 city_id = None
             else :
                 city_id = int(city_combo.get()[0])
-            print (city_id)
+
             street = street_entry.get()
             if (street_entry.get()==""):
                 street = None
             
             alley = alley_entry.get()
-            if (street_entry.get()==""):
+            if (alley_entry.get()==""):
                 alley = None
 
             plaque = plaque_entry.get()
@@ -453,17 +453,14 @@ class Application:
             address_text = address_text_entry.get()
             if (address_text_entry==""):
                 address_text = None
-            
-
             mydb.updateAddress(i, x, y, city_id, street, alley, plaque, address_text)
         addresses = mydb.showUserAddress(self.user_id)
         print (addresses)
-        print (addresses[0][0])
         self.edit_address_screen = Tk()
         self.edit_address_screen.title("Edit Address")
         for i in range(len(addresses)):
-            print (i)
-            print (type(i))
+            # print (i)
+            # print (type(i))
             Label(self.edit_address_screen, text="Address#"+str(i+1)).pack()
             # show x
             Label(self.edit_address_screen, text="Address x:").pack()
@@ -474,6 +471,7 @@ class Application:
             y_entry = Entry(self.edit_address_screen)
             y_entry.pack()
             # Show city
+            Label(self.edit_address_screen, text="Choose your city, if not please select None").pack()
             city_combo = Combobox(self.edit_address_screen)
             cities = mydb.showAllCity()
             cities_list = []
@@ -484,6 +482,7 @@ class Application:
             
             city_combo['values']= cities_list
             city_combo.pack()
+            city_combo.current(0)
             # Show Street
             Label(self.edit_address_screen, text="Address Street:").pack()
             street_entry = Entry(self.edit_address_screen)
@@ -498,7 +497,7 @@ class Application:
             plaque_entry.pack()
             # Show Address text
             Label(self.edit_address_screen, text="Address Text:").pack()
-            address_text_entry = Entry(self.profile)
+            address_text_entry = Entry(self.edit_address_screen)
             address_text_entry.pack()
             # Change button
             Button(self.edit_address_screen,text="Change my information", height="2", width="30", command=
