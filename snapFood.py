@@ -222,12 +222,24 @@ class SnapFoodDB:
         JOIN USER ON WALLET.walletid = USER.WALLETwalletid WHERE USER.userid = %s AND STATUS.name = \'Completed\';""", (str(user_id),))
         return self._mycursor.fetchall()
 
+    def showAllHistory(self, user_id):
+        """
+            invoiceid, total-price, ADDRESSaddressid, FOODfoodid, STATUS.name
+        """
+        self._mycursor.execute("""SELECT invoiceid, `total-price`, ADDRESSaddressid, FOODfoodid, STATUS.name FROM
+        ((((INVOIC JOIN (FOOD_INVOIC JOIN FOOD ON FOODfoodid = foodid) ON INVOICinvoiceid = invoiceid) 
+        JOIN STATUS ON STATUSstatusid = statusid)
+        JOIN ADDRESS ON ADDRESSaddressid = addressid)
+        JOIN WALLET ON WALLETwalletid = walletid)
+        JOIN USER ON WALLET.walletid = USER.WALLETwalletid WHERE USER.userid = %s;""", (str(user_id),))
+        return self._mycursor.fetchall()
+
     def addComment(self, invoic_id, rate, text = None): #NOT CHECKED
         self._mycursor.execute("INSERT INTO COMMENT(rate, text) VALUES (%s, %s);", (str(rate), str(text),))
         comment_id = self._mycursor.lastrowid
-        self._mycursor.execute("SELECT COMMENTcommentid FROM INVOIC WHERE invoiceid = %s;", (str(invoic_id),))
-        last_comment_id = int(self._mycursor.fetchall()[0][0])
-        self._mycursor.execute("DELETE FROM COMMENT WHERE commentid = %s;", (last_comment_id))
+        #self._mycursor.execute("SELECT COMMENTcommentid FROM INVOIC WHERE invoiceid = %s;", (str(invoic_id),))
+        #last_comment_id = int(self._mycursor.fetchall()[0][0])
+        #self._mycursor.execute("DELETE FROM COMMENT WHERE commentid = %s;", (str(last_comment_id),))
         self._mycursor.execute("UPDATE INVOIC SET COMMENTcommentid = %s WHERE invoiceid = %s;""", (str(comment_id), str(invoic_id),))
         self._mydb.commit()
         return comment_id
@@ -389,7 +401,3 @@ class SnapFoodDB:
 
     def close(self):
         self._mydb.close()
-
-db = SnapFoodDB()
-print(db.searchFood(price_h=46))
-db.close()
