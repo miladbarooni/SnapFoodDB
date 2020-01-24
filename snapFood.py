@@ -85,8 +85,8 @@ class SnapFoodDB:
         self._mycursor.execute("DELETE FROM ADDRESS WHERE addressid = %s;", (str(address_id),))
         self._mydb.commit()
 
-    def updateAddress(self, address_id, x = None, y = None, city_id = None, street = None, alley = None, plaque = None, address_text = None):
-        self._mycursor.execute("SELECT x, y, cityid, street, alley, plaque, address_text, locationid  FROM ADDRESS JOIN CITY ON ADDRESS.CITYcityid = CITY.cityid JOIN LOCATION ON ADDRESSaddressid = addressid WHERE ADDRESS.USERuserid = %s", (user_id))
+    def updateAddress(self, user_id, address_id, x = None, y = None, city_id = None, street = None, alley = None, plaque = None, address_text = None):
+        self._mycursor.execute("SELECT x, y, cityid, street, alley, plaque, address_text, locationid  FROM ADDRESS JOIN CITY ON ADDRESS.CITYcityid = CITY.cityid JOIN LOCATION ON ADDRESSaddressid = addressid WHERE ADDRESS.USERuserid = %s", (str(user_id),))
         data = self._mycursor.fetchall()[0]
         location_id = data[7]
         if x == None:
