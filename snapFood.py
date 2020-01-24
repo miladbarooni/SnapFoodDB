@@ -432,10 +432,22 @@ class SnapFoodDB:
         (((SHOP JOIN FOOD ON SHOPshopid = shopid)
         JOIN `FOOD_INVOIC ON FOODfoodid = foodid)
         JOIN INVOIC ON INVOICinvoiceid = invoiceid)
-        JOIN STATUS ON STATUSstatusid = statusid WHERE shopid = %s AND STATUS.name != \'Complete""", (str(shop_id),))
+        JOIN STATUS ON STATUSstatusid = statusid WHERE shopid = %s AND STATUS.name <> \'Completed\';""", (str(shop_id),))
+        return self._mycursor.fetchall()
+
+    def showShopHistory(self, shop_id):
+        """
+            invoiceid, total-price, ADDRESSaddressid, FOODfoodid, STATUS.name
+        """
+        self._mycursor.execute("""SELECT invoiceid, `total-price`, ADDESSaddressid, FOODfoodid, STATUS.name FROM
+        (((SHOP JOIN FOOD ON SHOPshopid = shopid)
+        JOIN `FOOD_INVOIC ON FOODfoodid = foodid)
+        JOIN INVOIC ON INVOICinvoiceid = invoiceid)
+        JOIN STATUS ON STATUSstatusid = statusid WHERE shopid = %s AND STATUS.name = \'Completed\';""", (str(shop_id),))
+        return self._mycursor.fetchall()
 
     def temp(self):
-        self._mycursor.execute("UPDATE STATUS SET name = \'Prepration\' WHERE statusid = 7;")
+        #self._mycursor.execute("UPDATE STATUS SET name = \'Prepration\' WHERE statusid = 7;")
         self._mydb.commit()
 
     def close(self):
