@@ -397,7 +397,15 @@ class SnapFoodDB:
         self._mycursor.execute("UPDATE WALLET SET balance = %s WHERE walletid = %s;", (str(balance + amount), str(wallet_id),))
         self._mydb.commit()
 
-    def adminLogin(self, username):  #NOT CHECKED
+    def calculateRate(self, shop_id):
+        self._mycursor.execute("""SELECT Avg(rate) FROM 
+        (((SHOP JOIN FOOD ON SHOPshopid = shopid)
+        JOIN FOOD_INVOIC on FOODfoodid = foodid)
+        JOIN INVOIC ON INVOICinvoiceid = invoiceid)
+        JOIN COMMENT ON COMMENTcommentid = commentid WHERE shopid = %s""",(str(shop_id),))
+        return self._mycursor.fetchall()
+
+    def adminLogin(self, username):
         self._mycursor.execute("SELECT * FROM ADMIN WHERE username = %s", (str(username),))
         return self._mycursor.fetchall()
 
@@ -424,34 +432,34 @@ class SnapFoodDB:
         .format(str(price), str(about), str(name), str(discount), str(image), str(category_id), str(food_id),))
         self._mydb.commit()
 
-    def showActiveOrder(self, shop_id):  #NOT CHECKED
+    def showActiveOrder(self, shop_id):
         """
             invoiceid, total-price, ADDRESSaddressid, FOODfoodid, STATUS.name
         """
-        self._mycursor.execute("""SELECT invoiceid, `total-price`, ADDESSaddressid, FOODfoodid, STATUS.name FROM
+        self._mycursor.execute("""SELECT invoiceid, `total-price`, INVOIC.ADDRESSaddressid, FOODfoodid, STATUS.name FROM
         (((SHOP JOIN FOOD ON SHOPshopid = shopid)
-        JOIN `FOOD_INVOIC ON FOODfoodid = foodid)
+        JOIN `FOOD_INVOIC` ON FOODfoodid = foodid)
         JOIN INVOIC ON INVOICinvoiceid = invoiceid)
         JOIN STATUS ON STATUSstatusid = statusid WHERE shopid = %s AND STATUS.name <> \'Completed\';""", (str(shop_id),))
         return self._mycursor.fetchall()
 
-    def showShopHistory(self, shop_id):  #NOT CHECKED
+    def showShopHistory(self, shop_id):
         """
             invoiceid, total-price, ADDRESSaddressid, FOODfoodid, STATUS.name
         """
-        self._mycursor.execute("""SELECT invoiceid, `total-price`, ADDESSaddressid, FOODfoodid, STATUS.name FROM
+        self._mycursor.execute("""SELECT invoiceid, `total-price`, INVOIC.ADDRESSaddressid, FOODfoodid, STATUS.name FROM
         (((SHOP JOIN FOOD ON SHOPshopid = shopid)
-        JOIN `FOOD_INVOIC ON FOODfoodid = foodid)
+        JOIN `FOOD_INVOIC` ON FOODfoodid = foodid)
         JOIN INVOIC ON INVOICinvoiceid = invoiceid)
         JOIN STATUS ON STATUSstatusid = statusid WHERE shopid = %s AND STATUS.name = \'Completed\';""", (str(shop_id),))
         return self._mycursor.fetchall()
 
-    def showAllComments(self, shop_id):  #NOT CHECKED
-        self._mycursor.execute("""SELECT invoiceid, `total-price`, ADDESSaddressid, FOODfoodid, COMMENT.text, COMMENT.rate FROM
+    def showAllComments(self, shop_id):
+        self._mycursor.execute("""SELECT invoiceid, `total-price`, INVOIC.ADDRESSaddressid, FOODfoodid, COMMENT.text, COMMENT.rate FROM
         (((SHOP JOIN FOOD ON SHOPshopid = shopid)
-        JOIN `FOOD_INVOIC ON FOODfoodid = foodid)
+        JOIN `FOOD_INVOIC` ON FOODfoodid = foodid)
         JOIN INVOIC ON INVOICinvoiceid = invoiceid)
-        JOIN COMMENT ON COMMENTcommetnid = commentid WHERE shopid = %s;""", (str(shop_id),))
+        JOIN COMMENT ON COMMENTcommentid = commentid WHERE shopid = %s;""", (str(shop_id),))
         return self._mycursor.fetchall()
 
     def temp(self):
@@ -462,5 +470,5 @@ class SnapFoodDB:
         self._mydb.close()
 
 db = SnapFoodDB()
-print(db.temp())
+print(db.showAllComments(3))
 db.close()
