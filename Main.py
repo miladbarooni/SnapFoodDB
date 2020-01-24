@@ -1,5 +1,5 @@
 from tkinter import Tk, Label, Button, Toplevel, StringVar, Entry, messagebox, Frame, END, Scrollbar, Y, RIGHT
-from tkinter import Checkbutton, IntVar, BooleanVar
+from tkinter import Checkbutton, IntVar, BooleanVar, Text, INSERT
 
 from functools import partial
 import tkinter as tk
@@ -10,7 +10,11 @@ from snapFood import *
 mydb = SnapFoodDB()
 
 
-
+style = Style()
+style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('Calibri', 11)) # Modify the font of the body
+style.configure("mystyle.Treeview.Heading", font=('Calibri', 13,'bold')) # Modify the font of the headings
+style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})]) # Remove the borders
+        
 
 class Application:
     def __init__(self, master):
@@ -36,10 +40,10 @@ class Application:
         self.makeMainWindow()
         
 
-    def loadingPage(self):
-        loader = Tk()
-        loader.title("loading")
-        # root.attributes('-alpha', 1.0)
+    # def loadingPage(self):
+    #     # loader = Tk()
+    #     # loader.title("loading")
+    #     # root.attributes('-alpha', 1.0)
 
     def makeMainWindow(self):
         
@@ -47,11 +51,11 @@ class Application:
 
         self.master.title("Account Login")
         
-        Label(text="Select Your Choice", bg="blue", width="300", height="2", font=("Calibri", 13)).pack()
+        Label(self.master,text="Select Your Choice", bg="blue", width="300", height="2", font=("Calibri", 13)).pack()
         Label(text="").pack()
-        Button(text="Login", height="2", width="30", command = self.loginPage).pack()
+        Button(self.master,text="Login", height="2", width="30", command = self.loginPage).pack()
         Label(text="").pack()
-        Button(text="Register", height="2", width="30", command=self.registerPage).pack()
+        Button(self.master, text="Register", height="2", width="30", command=self.registerPage).pack()
         
         closeButton = Button(self.master, text="Exit", command=self.master.quit, width="200", height="2")
         closeButton.pack()
@@ -310,10 +314,6 @@ class Application:
     
 
     def restaurantsPage(self):
-        style = Style()
-        style.configure("mystyle.Treeview", highlightthickness=0, bd=0, font=('Calibri', 11)) # Modify the font of the body
-        style.configure("mystyle.Treeview.Heading", font=('Calibri', 13,'bold')) # Modify the font of the headings
-        style.layout("mystyle.Treeview", [('mystyle.Treeview.treearea', {'sticky': 'nswe'})]) # Remove the borders
         
         def showRestaurants():
             def OnDoubleClickOnFood(tree,foods, event):
@@ -361,15 +361,7 @@ class Application:
                         tree.insert("", i+1, text=foods[i][3], values=(foods[i][1], foods[i][2], mydb.showCategoryName(foods[i][6])[0][0], foods[i][5], foods[i][4]))
                     tree.bind("<Double-1>", partial(OnDoubleClickOnFood,tree, foods))
                     
-            def make_address_str(address_id):
-                address_info = mydb.showAddress(address_id)
-                address_info = address_info[0]
-                address_str = address_info[0] + ", "
-                # print (address_info)
-                for i in range(2,6):
-                    address_str += address_info[i] + ", "
-                # print (address_str)
-                return address_str
+            
 
             address_id = -1
             for variable in all_variables:
@@ -395,7 +387,7 @@ class Application:
             tree.heading("three", text="address",anchor=tk.W)
             list_of_resturant_in_treeview = []
             for i in range(len(resturants)):
-                resturant_in_treeview = tree.insert("", i+1, text=resturants[i][1], values=(resturants[i][2], resturants[i][3], make_address_str(resturants[i][4])))
+                resturant_in_treeview = tree.insert("", i+1, text=resturants[i][1], values=(resturants[i][2], resturants[i][3], self.make_address_str(resturants[i][4])))
                 list_of_resturant_in_treeview.append(resturant_in_treeview)
             # for resturant in list_of_resturant_in_treeview:
             #     index = list_of_resturant_in_treeview.index(resturant)
@@ -428,16 +420,108 @@ class Application:
             Checkbutton(self.address_selection_screen, text=address_str, variable=vari).pack()        
         Button(self.address_selection_screen, text="Submit", command=showRestaurants).pack()
 
-        
-        
-    
+
+    def make_address_str(self, address_id):
+        address_info = mydb.showAddress(address_id)
+        address_info = address_info[0]
+        address_str = address_info[0] + ", "
+        # print (address_info)
+        for i in range(2,6):
+            address_str += address_info[i] + ", "
+        # print (address_str)
+        return address_str
+
+    def make_foods_str(self, foods_list):
+        food_str_dict = {}
+        for food in foods_list:
+            food_str = mydb.showFoods([food])[0][3]
+            if food_str in food_str_dict.keys():
+                food_str_dict[food_str] += 1
+            else:
+                food_str_dict[food_str] = 1
+
+        return_str = ""
+        for food_name in list(food_str_dict.keys()):
+            return_str += food_name + ": "
+            return_str += str(food_str_dict[food_name]) + "  "
+        return return_str
+
+    def saveComment(self, order_id, comment_entry, rate_entry):
+        mydb.addComment(order_id, rate_entry.get(), comment_entry.get())
+
+
     def orderPage(self):
+        def OnDoubleClickOnOrder(tree, orders_list, event):
+            item = tree.identify('item',event.x,event.y)
+            order_number = tree.item(item,"text")
+            
+            order_id = orders_list [int(order_number[-1]) - 1]
+            self.order_comment_page = Tk()
+            self.order_comment_page.title("Comment")
+            Label(self.order_comment_page, text="Comment on this order", bg="yellow", width="300", height="2", font=("Calibri", 13)).pack()
+            Label(text="").pack()
+            Label(self.order_comment_page, text="Your comment:").pack()
+            comment_entry = Entry(self.order_comment_page)
+            comment_entry.pack()
+            Label(self.order_comment_page, text="Your rating to this order(from 0 to 100):").pack()
+            rate_entry = Entry(self.order_comment_page)
+            rate_entry.pack()
+            Button(self.order_comment_page, text="comment this", command=partial(self.saveComment, order_id, comment_entry, rate_entry)).pack()
+
+
+            
+
         def showHistoryOfOrders():
+            self.history_of_orders_screen = Tk()
+            self.history_of_orders_screen.title("Hisotry of orders")
+            Label(self.history_of_orders_screen, text="History of orders, click on them to comment", bg="yellow", width="300", height="2", font=("Calibri", 13)).pack()
+            Label(text="").pack()
+            tree=Treeview(self.history_of_orders_screen, style="mystyle.Treeview")
+            tree["columns"]=("one","two","three")
+            #set tree columns
+            tree.column("#0", width=270, minwidth=270, stretch=tk.NO)
+            tree.column("one", width=150, minwidth=150, stretch=tk.NO)
+            tree.column("two", width=400, minwidth=200)
+            tree.column("three", width=80, minwidth=50, stretch=tk.YES)
+            #set tree's heading
+            tree.heading("#0",text="Order#",anchor=tk.W)
+            tree.heading("one", text="Total Price",anchor=tk.W)
+            tree.heading("two", text="Address",anchor=tk.W)
+            tree.heading("three", text="Foods",anchor=tk.W)
             history_of_orders = mydb.showBuyHistory(self.user_id)
-            print (history_of_orders)
+            invoic_dict = {}
+            for history in history_of_orders:
+                if ((history[0],history[1],history[2]) in invoic_dict.keys()):
+                    invoic_dict[(history[0],history[1],history[2])].append(history[3])
+                else:
+                    invoic_dict[(history[0],history[1],history[2])] = []
+                    invoic_dict[(history[0],history[1],history[2])].append(history[3])
+            
+            # print (type(list(invoic_dict.keys())))
+            # print (invoic_dict)
+
+            tree.pack(side=tk.TOP,fill=tk.X)
+            orders_list = []
+            for key in invoic_dict.keys():
+                orders_list.append(key[0])
+            for i in range(len(list(invoic_dict.keys()))):
+                address_id = list(invoic_dict.keys())[i][2]
+                foods_list = invoic_dict[list(invoic_dict.keys())[i]]
+                print (foods_list)
+                tree.insert("", i+1, text="Order#"+str(i+1), values=(list(invoic_dict.keys())[i][1], self.make_address_str(address_id), self.make_foods_str(foods_list)))
+            # resturant_in_treeview = tree.insert("", i+1, text=resturants[i][1], values=(resturants[i][2], resturants[i][3], make_address_str(resturants[i][4])))
+            # list_of_resturant_in_treeview.append(resturant_in_treeview)
+            tree.bind("<Double-1>", partial(OnDoubleClickOnOrder,tree, orders_list))
+        
+        
         def finilizeCart(discount_code):
             # print (self.address_id)
             self.ivoice_id = mydb.finalizeCart(self.user_id, self.address_id, discount_code.get())
+
+        def showAllOrders():
+            print ("show all orders")
+
+
         self.order_screen = Tk()
         self.order_screen.title("Orders Page")
         Label(self.order_screen, text="Finilize your Cart", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
@@ -446,10 +530,12 @@ class Application:
         discount_code = Entry(self.order_screen)
         discount_code.pack()
         Button(self.order_screen,text="Buy your Cart", height="2", width="30", command=partial(finilizeCart, discount_code)).pack()
-        Label(self.order_screen, text="Your Orders History", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
+        Label(self.order_screen, text="Your Orders History (Compeleted)", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
         Label(text="").pack()
         Button(self.order_screen,text="history of orders", height="2", width="30", command=showHistoryOfOrders).pack()
-
+        Label(self.order_screen, text="Your All Orders", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
+        Label(text="").pack()
+        Button(self.order_screen,text="history of orders", height="2", width="30", command=showAllOrders).pack()
 root = Tk()
 my_gui = Application(root)
 root.mainloop()
