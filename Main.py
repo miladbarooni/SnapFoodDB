@@ -47,7 +47,7 @@ class Application:
 
     def makeMainWindow(self):
         
-        self.master.geometry("300x250")
+        self.master.geometry("300x200")
 
         self.master.title("Account Login")
         
@@ -157,7 +157,7 @@ class Application:
         self.login_screen.destroy
         self.dashboard = Tk()
         self.dashboard.title("User Dashboard")
-        self.dashboard.geometry("300x250")
+        self.dashboard.geometry("300x300")
 
         Label(self.dashboard, text="Select Your Choice", bg="blue", width="300", height="2", font=("Calibri", 13)).pack()
         Label(text="").pack()
@@ -166,10 +166,104 @@ class Application:
         Button(self.dashboard,text="Restaurants", height="2", width="30", command=self.restaurantsPage).pack()
         Label(text="").pack()
         Button(self.dashboard,text="Order", height="2", width="30", command=self.orderPage).pack()
+        Button(self.dashboard,text="Search", height="2", width="30", command=self.searchFoodOrShop).pack()
         
         closeButton = Button(self.dashboard, text="Exit", command=self.dashboard.destroy, width="200", height="2")
         closeButton.pack()
 
+
+    def searchFoodOrShop(self):
+        self.search_screen = Tk()
+        self.search_screen.title("Search page")
+        Label(self.search_screen, text="Search By Shops", bg="Green", width="300", height="2", font=("Calibri", 13)).pack()
+        Label(text="").pack()
+        Label(self.search_screen, text="Search part of a name").pack()
+        shop_name_entry = Entry(self.search_screen)
+        shop_name_entry.pack()
+        Label(self.search_screen, text="Choose a city to find shops at that city").pack()
+        city_combo = Combobox(self.search_screen)
+        cities = mydb.showAllCity()
+        self.number_of_cities = len(cities)
+        cities_list = []
+        
+        for i in cities:
+            cities_list.append(i[1])
+        cities_list.append("None")
+        city_combo['values']= cities_list
+        city_combo.pack()
+        city_combo.current(len(cities))
+        # city_id = mydb.addCity(city_combo.get())
+        Label(self.search_screen, text="Enter Min Bill Value:").pack()
+        min_bill_entry = Entry(self.search_screen)
+        min_bill_entry.pack()
+        Button(self.search_screen, text="Search", command=partial(self.showRestaurantsBySearch, city_combo, shop_name_entry, min_bill_entry)).pack()
+        Label(self.search_screen, text="Search By Foods", bg="Green", width="300", height="2", font=("Calibri", 13)).pack()
+        Label(text="").pack()
+        Label(self.search_screen, text="Enter a Low Boundery for price").pack()
+        price_l_entry = Entry(self.search_screen)
+        Label(self.search_screen, text="Enter a High Boundery for price").pack()
+        price_h_entry = Entry(self.search_screen)
+        Button(self.search_screen, text="Search").pack()
+        Label(self.search_screen, text="Search part of a food name").pack()
+        food_name_entry = Entry(self.search_screen)
+        Label(self.search_screen, text="Enter your desire discount").pack()
+        discount_entry = Entry(self.search_screen)
+        Label(self.search_screen, text="Choose a catogory for you desire food").pack()
+        cat_combo = Combobox(self.search_screen)
+        cities = mydb.showAllCity()
+        self.number_of_cities = len(cities)
+        cities_list = []
+        
+        for i in cities:
+            cities_list.append(i[1])
+        cities_list.append("None")
+        city_combo['values']= cities_list
+        city_combo.pack()
+        city_combo.current(len(cities))
+
+
+
+    def showRestaurantsBySearch(self, city_combo, shop_name_entry, min_bill_entry):
+        city_id = -1
+        if (city_combo.get() == "None"):
+            city_id = None
+        else:
+            city_id = mydb.addCity(city_combo.get())
+        min_bill = min_bill_entry.get()
+        if (min_bill_entry.get() == ""):
+            min_bill = None
+        shop_name = shop_name_entry.get()
+        if (shop_name_entry.get() == ""):
+            shop_name = None
+
+        resturants = mydb.searchShop(city_id, shop_name, min_bill)
+        # print (resturants)
+        self.searched_resturant_screen = Tk()
+        self.searched_resturant_screen.title("Results")
+        tree=Treeview(self.searched_resturant_screen,style="mystyle.Treeview")
+        tree["columns"]=("one","two","three")
+        #set tree columns
+        tree.column("#0", width=270, minwidth=270, stretch=tk.NO)
+        tree.column("one", width=150, minwidth=150, stretch=tk.NO)
+        tree.column("two", width=400, minwidth=200)
+        tree.column("three", width=80, minwidth=50, stretch=tk.YES)
+        #set tree's heading
+        tree.heading("#0",text="Name",anchor=tk.W)
+        tree.heading("one", text="About",anchor=tk.W)
+        tree.heading("two", text="min bill value",anchor=tk.W)
+        tree.heading("three", text="address",anchor=tk.W)
+        list_of_resturant_in_treeview = []
+        for i in range(len(resturants)):
+            resturant_in_treeview = tree.insert("", i+1, text=resturants[i][1], values=(resturants[i][2], resturants[i][3], self.make_address_str(resturants[i][4])))
+            list_of_resturant_in_treeview.append(resturant_in_treeview)
+        # for resturant in list_of_resturant_in_treeview:
+        #     index = list_of_resturant_in_treeview.index(resturant)
+        #     shop_id = resturants[index][0]
+        #     shop_foods = mydb.showFoodsOfShop(shop_id)
+            
+        tree.pack(side=tk.TOP,fill=tk.X)
+        tree.bind("<Double-1>", partial(self.OnDoubleClick,tree, resturants))
+    
     def profilePage(self):
         def showAddress():
             self.current_address_screen = Tk()
@@ -311,106 +405,130 @@ class Application:
         except:
             print ("can't change the information")
         Label(self.profile, text="Changed seccussful").pack()
+
+
+
+    def OnDoubleClick(self, tree,resturants, event):
+        item = tree.identify('item',event.x,event.y)
+        resturant_name = tree.item(item,"text")
+        resturant_id = -1 
+        for res in resturants:
+            if (res[1] == resturant_name):
+                resturant_id = res[0]
+        # print (resturant_id)
+        foods = mydb.showFoodsOfShop(resturant_id)
+        self.menu_screen = Tk()
+        self.menu_screen.title(resturant_name+" Menu")
+        if (len(foods) != 0):
+            
+            Label(self.menu_screen, text="Resturant Menu", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
+            Label(text="").pack()
+            tree=Treeview(self.menu_screen,style="mystyle.Treeview")
+            tree["columns"]=("one","two","three", "four", "five")
+            #set tree columns
+            tree.column("#0", width=150, minwidth=150, stretch=tk.NO)
+            tree.column("one", width=400, minwidth=200)
+            tree.column("two", width=80, minwidth=50, stretch=tk.YES)
+            tree.column("three", width=80, minwidth=50, stretch=tk.YES)
+            tree.column("four", width=80, minwidth=50, stretch=tk.YES)
+            tree.column("five", width=80, minwidth=50, stretch=tk.YES)
+            #set tree's heading
+            tree.heading("#0", text="Name",anchor=tk.W)
+            tree.heading("one", text="Price",anchor=tk.W)
+            tree.heading("two", text="About",anchor=tk.W)
+            tree.heading("three", text="Category",anchor=tk.W)
+            tree.heading("four", text="Image",anchor=tk.W)
+            tree.heading("five", text="Discount",anchor=tk.W)
+            tree.pack()
+            for i in range(len(foods)):
+                tree.insert("", i+1, text=foods[i][3], values=(foods[i][1], foods[i][2], mydb.showCategoryName(foods[i][6])[0][0], foods[i][5], foods[i][4]))
+            tree.bind("<Double-1>", partial(self.OnDoubleClickOnFood,tree, foods))
+
+        ######################################
+        ######################################
+        ######################################
+        #LAST FOOD FORM THIS RESTURANT
+        ######################################
+        ######################################
+        ######################################
+        last_foods = mydb.showOrderByShop(self.user_id, resturant_id)
+        last_foods = list(dict.fromkeys(last_foods))
+        # print (last_foods)
+        Label(self.menu_screen, text="Last orders from this resturant", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
+        Label(text="").pack()
+        tree=Treeview(self.menu_screen,style="mystyle.Treeview")
+        tree["columns"]=("one","two","three", "four", "five")
+        #set tree columns
+        tree.column("#0", width=150, minwidth=150, stretch=tk.NO)
+        tree.column("one", width=400, minwidth=200)
+        tree.column("two", width=80, minwidth=50, stretch=tk.YES)
+        tree.column("three", width=80, minwidth=50, stretch=tk.YES)
+        tree.column("four", width=80, minwidth=50, stretch=tk.YES)
+        tree.column("five", width=80, minwidth=50, stretch=tk.YES)
+        #set tree's heading
+        tree.heading("#0", text="Name",anchor=tk.W)
+        tree.heading("one", text="Price",anchor=tk.W)
+        tree.heading("two", text="About",anchor=tk.W)
+        tree.heading("three", text="Category",anchor=tk.W)
+        tree.heading("four", text="Image",anchor=tk.W)
+        tree.heading("five", text="Discount",anchor=tk.W)
+        tree.pack()
+        for i in range(len(last_foods)):
+            tree.insert("", i+1, text=last_foods[i][3], values=(last_foods[i][1], last_foods[i][2], mydb.showCategoryName(last_foods[i][6])[0][0], last_foods[i][5], last_foods[i][4]))
+        tree.bind("<Double-1>", partial(self.OnDoubleClickOnFood,tree, last_foods))
+    
+    def OnDoubleClickOnFood(self, tree,foods, event):
+        item = tree.identify('item',event.x,event.y)
+        food_name = tree.item(item,"text")
+        food_id = -1
+        for food in foods:
+            if (food[3] == food_name):
+                food_id = food[0]
+                break
+        #Add the food to cart
+        self.cart_id = mydb.addFoodToCart(food_id, self.user_id)
+
     
 
-    def restaurantsPage(self):
+    def showRestaurants(self, all_variables, all_address):
+
+        address_id = -1
+        for variable in all_variables:
+            if (variable.get()):
+                index = all_variables.index(variable)
+                address_id = all_address[index][1]
+                self.address_id = address_id
+        resturants = mydb.searchShopByLocation(int(address_id), 100)
+        # print (resturants)
+        self.searched_resturant_screen = Tk()
+        self.searched_resturant_screen.title("Results")
+        tree=Treeview(self.searched_resturant_screen,style="mystyle.Treeview")
+        tree["columns"]=("one","two","three")
+        #set tree columns
+        tree.column("#0", width=270, minwidth=270, stretch=tk.NO)
+        tree.column("one", width=150, minwidth=150, stretch=tk.NO)
+        tree.column("two", width=400, minwidth=200)
+        tree.column("three", width=80, minwidth=50, stretch=tk.YES)
+        #set tree's heading
+        tree.heading("#0",text="Name",anchor=tk.W)
+        tree.heading("one", text="About",anchor=tk.W)
+        tree.heading("two", text="min bill value",anchor=tk.W)
+        tree.heading("three", text="address",anchor=tk.W)
+        list_of_resturant_in_treeview = []
+        for i in range(len(resturants)):
+            resturant_in_treeview = tree.insert("", i+1, text=resturants[i][1], values=(resturants[i][2], resturants[i][3], self.make_address_str(resturants[i][4])))
+            list_of_resturant_in_treeview.append(resturant_in_treeview)
+        # for resturant in list_of_resturant_in_treeview:
+        #     index = list_of_resturant_in_treeview.index(resturant)
+        #     shop_id = resturants[index][0]
+        #     shop_foods = mydb.showFoodsOfShop(shop_id)
+            
+        tree.pack(side=tk.TOP,fill=tk.X)
+        tree.bind("<Double-1>", partial(self.OnDoubleClick,tree, resturants))
+
+        #find element on double click
         
-        def showRestaurants():
-            def OnDoubleClickOnFood(tree,foods, event):
-                item = tree.identify('item',event.x,event.y)
-                food_name = tree.item(item,"text")
-                food_id = -1
-                for food in foods:
-                    if (food[3] == food_name):
-                        food_id = food[0]
-                        break
-                #Add the food to cart
-                self.cart_id = mydb.addFoodToCart(food_id, self.user_id)
-            def OnDoubleClick(tree, event):
-                item = tree.identify('item',event.x,event.y)
-                resturant_name = tree.item(item,"text")
-                resturant_id = -1 
-                for res in resturants:
-                    if (res[1] == resturant_name):
-                        resturant_id = res[0]
-                # print (resturant_id)
-                foods = mydb.showFoodsOfShop(resturant_id)
-                self.menu_screen = Tk()
-                self.menu_screen.title(resturant_name+" Menu")
-                if (len(foods) != 0):
-                    
-                    Label(self.menu_screen, text="Resturant Menu", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
-                    Label(text="").pack()
-                    tree=Treeview(self.menu_screen,style="mystyle.Treeview")
-                    tree["columns"]=("one","two","three", "four", "five")
-                    #set tree columns
-                    tree.column("#0", width=150, minwidth=150, stretch=tk.NO)
-                    tree.column("one", width=400, minwidth=200)
-                    tree.column("two", width=80, minwidth=50, stretch=tk.YES)
-                    tree.column("three", width=80, minwidth=50, stretch=tk.YES)
-                    tree.column("four", width=80, minwidth=50, stretch=tk.YES)
-                    tree.column("five", width=80, minwidth=50, stretch=tk.YES)
-                    #set tree's heading
-                    tree.heading("#0", text="Name",anchor=tk.W)
-                    tree.heading("one", text="Price",anchor=tk.W)
-                    tree.heading("two", text="About",anchor=tk.W)
-                    tree.heading("three", text="Category",anchor=tk.W)
-                    tree.heading("four", text="Image",anchor=tk.W)
-                    tree.heading("five", text="Discount",anchor=tk.W)
-                    tree.pack()
-                    for i in range(len(foods)):
-                        tree.insert("", i+1, text=foods[i][3], values=(foods[i][1], foods[i][2], mydb.showCategoryName(foods[i][6])[0][0], foods[i][5], foods[i][4]))
-                    tree.bind("<Double-1>", partial(OnDoubleClickOnFood,tree, foods))
-
-                ######################################
-                ######################################
-                ######################################
-                #LAST FOOD FORM THIS RESTURANT
-                ######################################
-                ######################################
-                ######################################
-                
-                last_foods = mydb.showOrderByShop(self.user_id, resturant_id)
-                print (last_foods)
-            
-
-            address_id = -1
-            for variable in all_variables:
-                if (variable.get()):
-                    index = all_variables.index(variable)
-                    address_id = all_address[index][1]
-                    self.address_id = address_id
-            resturants = mydb.searchShopByLocation(int(address_id), 100)
-            # print (resturants)
-            self.searched_resturant_screen = Tk()
-            self.searched_resturant_screen.title("Results")
-            tree=Treeview(self.searched_resturant_screen,style="mystyle.Treeview")
-            tree["columns"]=("one","two","three")
-            #set tree columns
-            tree.column("#0", width=270, minwidth=270, stretch=tk.NO)
-            tree.column("one", width=150, minwidth=150, stretch=tk.NO)
-            tree.column("two", width=400, minwidth=200)
-            tree.column("three", width=80, minwidth=50, stretch=tk.YES)
-            #set tree's heading
-            tree.heading("#0",text="Name",anchor=tk.W)
-            tree.heading("one", text="About",anchor=tk.W)
-            tree.heading("two", text="min bill value",anchor=tk.W)
-            tree.heading("three", text="address",anchor=tk.W)
-            list_of_resturant_in_treeview = []
-            for i in range(len(resturants)):
-                resturant_in_treeview = tree.insert("", i+1, text=resturants[i][1], values=(resturants[i][2], resturants[i][3], self.make_address_str(resturants[i][4])))
-                list_of_resturant_in_treeview.append(resturant_in_treeview)
-            # for resturant in list_of_resturant_in_treeview:
-            #     index = list_of_resturant_in_treeview.index(resturant)
-            #     shop_id = resturants[index][0]
-            #     shop_foods = mydb.showFoodsOfShop(shop_id)
-                
-            tree.pack(side=tk.TOP,fill=tk.X)
-            tree.bind("<Double-1>", partial(OnDoubleClick,tree))
-
-            #find element on double click
-            
-                    
+    def restaurantsPage(self):      
         self.address_selection_screen = Tk()
         self.address_selection_screen.title("Your addresses")
         self.address_selection_screen.geometry("700x500")
@@ -429,7 +547,7 @@ class Application:
             vari = IntVar(self.address_selection_screen)
             all_variables.append(vari)
             Checkbutton(self.address_selection_screen, text=address_str, variable=vari).pack()        
-        Button(self.address_selection_screen, text="Submit", command=showRestaurants).pack()
+        Button(self.address_selection_screen, text="Submit", command=partial(self.showRestaurants, all_variables, all_address) ).pack()
 
 
     def make_address_str(self, address_id):

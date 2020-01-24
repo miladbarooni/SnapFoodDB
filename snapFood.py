@@ -302,7 +302,7 @@ class SnapFoodDB:
         if min_bill_val != -1:
             if need_and == 1 :
                 sql += " AND "
-            sql += "SHOP.minimum-bill-value > %s"
+            sql += "SHOP.`minimum-bill-value` > %s"
             vals.append(str(min_bill_val))
         sql += ";"
         self._mycursor.execute(sql, vals)
