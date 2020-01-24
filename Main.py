@@ -171,14 +171,16 @@ class Application:
             self.current_address_screen = Tk()
             addresses = mydb.showUserAddress(self.user_id)
             # print (addresses)
+            print (addresses)
             for i in range(len(addresses)):
+                # print (addresses[i])
                 Label(self.current_address_screen, text="Address #"+str(i+1)+":").pack()
                 address_str = ""
                 address_str+=addresses[i][0] + ", "
                 for j in range(2,6):
                     address_str += addresses[i][j] + ", "
                 Label(self.current_address_screen, text=address_str).pack()
-        # self.dashboard.destroy()
+                Button(self.current_address_screen, text="Delete this address",command=partial(self.deleteAddress, addresses[i][1])).pack()
         self.profile = Tk()
         self.profile.title("User Profile")
         self.profile.geometry("700x1000")
@@ -239,10 +241,28 @@ class Application:
         
         add_address_button = Button(self.profile, text="Add Address", command=self.addAddress)
         add_address_button.pack()
+        
+        edit_address_button = Button(self.profile, text="Edit Exists Address", command=self.editAddresses)
+        edit_address_button.pack()
         """
         ########################################################## 
         """
-        
+    
+    def deleteAddress(self, address_id):
+        # print (address_id)
+        mydb.deletAddress(address_id)
+
+
+    def editAddresses(self):
+        addresses = mydb.showUserAddress(self.user_id)
+        self.edit_address_screen = Tk()
+        self.edit_address_screen.title("Edit Address")
+        for i in range(len(addresses)):
+            Label(self.edit_address_screen, text="Address #"+str(i), bg="red", width="300", height="2", font=("Calibri", 13)).pack()
+            Label(text="").pack()
+
+
+
     def addAddress(self):
         def addNewAddress():
             mydb.addAddress(x_entry.get(), y_entry.get(), self.user_id, mydb.addCity(city_combo.get()), street_entry.get()
@@ -321,25 +341,24 @@ class Application:
                     Label(self.menu_screen, text="Resturant Menu", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
                     Label(text="").pack()
                     tree=Treeview(self.menu_screen,style="mystyle.Treeview")
-                    tree["columns"]=("one","two","three", "four", "five", "six")
+                    tree["columns"]=("one","two","three", "four", "five")
                     #set tree columns
-                    tree.column("one", width=150, minwidth=150, stretch=tk.NO)
-                    tree.column("two", width=400, minwidth=200)
+                    tree.column("#0", width=150, minwidth=150, stretch=tk.NO)
+                    tree.column("one", width=400, minwidth=200)
+                    tree.column("two", width=80, minwidth=50, stretch=tk.YES)
                     tree.column("three", width=80, minwidth=50, stretch=tk.YES)
                     tree.column("four", width=80, minwidth=50, stretch=tk.YES)
                     tree.column("five", width=80, minwidth=50, stretch=tk.YES)
-                    tree.column("six", width=80, minwidth=50, stretch=tk.YES)
                     #set tree's heading
-                    tree.heading("one", text="Name",anchor=tk.W)
-                    tree.heading("two", text="Price",anchor=tk.W)
-                    tree.heading("three", text="About",anchor=tk.W)
-                    tree.heading("four", text="Category",anchor=tk.W)
-                    tree.heading("five", text="Image",anchor=tk.W)
-                    tree.heading("six", text="Discount",anchor=tk.W)
+                    tree.heading("#0", text="Name",anchor=tk.W)
+                    tree.heading("one", text="Price",anchor=tk.W)
+                    tree.heading("two", text="About",anchor=tk.W)
+                    tree.heading("three", text="Category",anchor=tk.W)
+                    tree.heading("four", text="Image",anchor=tk.W)
+                    tree.heading("five", text="Discount",anchor=tk.W)
                     tree.pack()
-                    
                     for i in range(len(foods)):
-                        tree.insert("", i+1, text=foods[i][3], values=(foods[i][1], foods[i][2], "Category", foods[i][5], foods[i][4]))
+                        tree.insert("", i+1, text=foods[i][3], values=(foods[i][1], foods[i][2], mydb.showCategoryName(foods[i][6])[0][0], foods[i][5], foods[i][4]))
                     tree.bind("<Double-1>", partial(OnDoubleClickOnFood,tree, foods))
                     
             def make_address_str(address_id):
@@ -392,8 +411,10 @@ class Application:
         self.address_selection_screen = Tk()
         self.address_selection_screen.title("Your addresses")
         self.address_selection_screen.geometry("700x500")
+        Label(self.address_selection_screen, text="Choose an address to find the nearest resturant to you", bg="yellow", width="300", height="2", font=("Calibri", 13)).pack()
+        Label(text="").pack()
         all_address = mydb.showUserAddress(self.user_id)
-        print (all_address)
+        # print (all_address)
         all_variables = []
 
         list_of_address_str = []
@@ -415,8 +436,8 @@ class Application:
             history_of_orders = mydb.showBuyHistory(self.user_id)
             print (history_of_orders)
         def finilizeCart(discount_code):
-            print (self.address_id)
-            mydb.finalizeCart(self.user_id, self.address_id, discount_code.get())
+            # print (self.address_id)
+            self.ivoice_id = mydb.finalizeCart(self.user_id, self.address_id, discount_code.get())
         self.order_screen = Tk()
         self.order_screen.title("Orders Page")
         Label(self.order_screen, text="Finilize your Cart", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
