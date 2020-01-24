@@ -87,9 +87,12 @@ class SnapFoodDB:
 
     def updateAddress(self, x = None, y = None, city_id = None, street = None, alley = None, plaque = None, address_text = None):
         data = self.showAddress(address_id)
-        if x == None:
-            return
-
+        #if x == None:
+        #if x == None:
+        #if x == None:
+        #if x == None:
+        #if x == None:
+        #if x == None:
 
     def searchShopByLocation(self, address_id, radius):
         self._mycursor.execute("SELECT * FROM LOCATION WHERE ADDRESSaddressid = \'{}\';".format(address_id))
@@ -198,8 +201,8 @@ class SnapFoodDB:
         """
         self._mycursor.execute("""SELECT invoiceid, `total-price`, DISCOUNT.text, ADDRESSaddressid, FOODfoodid, COMMENT.commentid, STATUS.name FROM
         ((((((INVOIC JOIN DISCOUNT ON DISCOUNTdiscountid = discountid)
-        JOIN COMMENT ON COMMENTcomentid = commentid)
-        JOIN (FOOD_INVOIC ON INVOICinvoicid = invoiceid) JOIN FOOD ON FOODfoodid = foodid)
+        JOIN COMMENT ON COMMENTcommentid = commentid)
+        JOIN (FOOD_INVOIC JOIN FOOD ON FOODfoodid = foodid) ON INVOICinvoiceid = invoiceid) 
         JOIN STATUS ON STATUSstatusid = statusid)
         JOIN ADDRESS ON ADDRESSaddressid = addressid)
         JOIN WALLET ON WALLETwalletid = walletid)
@@ -346,3 +349,7 @@ class SnapFoodDB:
 
     def close(self):
         self._mydb.close()
+
+db = SnapFoodDB()
+print(db.showBuyHistory(4))
+db.close()
