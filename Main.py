@@ -335,9 +335,10 @@ class Application:
                         resturant_id = res[0]
                 # print (resturant_id)
                 foods = mydb.showFoodsOfShop(resturant_id)
+                self.menu_screen = Tk()
+                self.menu_screen.title(resturant_name+" Menu")
                 if (len(foods) != 0):
-                    self.menu_screen = Tk()
-                    self.menu_screen.title(resturant_name+" Menu")
+                    
                     Label(self.menu_screen, text="Resturant Menu", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
                     Label(text="").pack()
                     tree=Treeview(self.menu_screen,style="mystyle.Treeview")
@@ -360,7 +361,17 @@ class Application:
                     for i in range(len(foods)):
                         tree.insert("", i+1, text=foods[i][3], values=(foods[i][1], foods[i][2], mydb.showCategoryName(foods[i][6])[0][0], foods[i][5], foods[i][4]))
                     tree.bind("<Double-1>", partial(OnDoubleClickOnFood,tree, foods))
-                    
+
+                ######################################
+                ######################################
+                ######################################
+                #LAST FOOD FORM THIS RESTURANT
+                ######################################
+                ######################################
+                ######################################
+                
+                last_foods = mydb.showOrderByShop(self.user_id, resturant_id)
+                print (last_foods)
             
 
             address_id = -1
@@ -519,7 +530,48 @@ class Application:
             self.ivoice_id = mydb.finalizeCart(self.user_id, self.address_id, discount_code.get())
 
         def showAllOrders():
-            print ("show all orders")
+            self.all_orders_screen = Tk()
+            self.all_orders_screen.title("All Orders")
+            all_history = mydb.showAllHistory(self.user_id)
+            print (all_history)
+            Label(self.all_orders_screen, text="All your orders", bg="yellow", width="300", height="2", font=("Calibri", 13)).pack()
+            Label(text="").pack()
+            tree=Treeview(self.all_orders_screen, style="mystyle.Treeview")
+            tree["columns"]=("one","two","three", "four")
+            #set tree columns
+            tree.column("#0", width=270, minwidth=270, stretch=tk.NO)
+            tree.column("one", width=150, minwidth=150, stretch=tk.NO)
+            tree.column("two", width=400, minwidth=200)
+            tree.column("three", width=80, minwidth=50, stretch=tk.YES)
+            tree.column("four", width=80, minwidth=50, stretch=tk.YES)
+            #set tree's heading
+            tree.heading("#0",text="Order#",anchor=tk.W)
+            tree.heading("one", text="Total Price",anchor=tk.W)
+            tree.heading("two", text="Address",anchor=tk.W)
+            tree.heading("three", text="Status",anchor=tk.W)
+            tree.heading("four", text="Foods",anchor=tk.W)
+            invoic_dict = {}
+            for history in all_history:
+                if ((history[0],history[1],history[2]) in invoic_dict.keys()):
+                    invoic_dict[(history[0],history[1],history[2], history[4])].append(history[3])
+                else:
+                    invoic_dict[(history[0],history[1],history[2], history[4])] = []
+                    invoic_dict[(history[0],history[1],history[2], history[4])].append(history[3])
+            
+            # print (type(list(invoic_dict.keys())))
+            print (invoic_dict)
+
+            tree.pack(side=tk.TOP,fill=tk.X)
+            orders_list = []
+            for key in invoic_dict.keys():
+                orders_list.append(key[0])
+            for i in range(len(list(invoic_dict.keys()))):
+                address_id = list(invoic_dict.keys())[i][2]
+                foods_list = invoic_dict[list(invoic_dict.keys())[i]]
+                print (foods_list)
+                tree.insert("", i+1, text="Order#"+str(i+1), values=(list(invoic_dict.keys())[i][1], self.make_address_str(address_id),list(invoic_dict.keys())[i][3] ,self.make_foods_str(foods_list)))
+            # resturant_in_treeview = tree.insert("", i+1, text=resturants[i][1], values=(resturants[i][2], resturants[i][3], make_address_str(resturants[i][4])))
+            # list_of_resturant_in_treeview.append(resturant_in_treeview)
 
 
         self.order_screen = Tk()
@@ -535,7 +587,7 @@ class Application:
         Button(self.order_screen,text="history of orders", height="2", width="30", command=showHistoryOfOrders).pack()
         Label(self.order_screen, text="Your All Orders", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
         Label(text="").pack()
-        Button(self.order_screen,text="history of orders", height="2", width="30", command=showAllOrders).pack()
+        Button(self.order_screen,text="All Orders", height="2", width="30", command=showAllOrders).pack()
 root = Tk()
 my_gui = Application(root)
 root.mainloop()
