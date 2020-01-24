@@ -278,7 +278,7 @@ class SnapFoodDB:
     def showOrderByShop(self, user_id, shop_id): #NOT CHECKED
         self._mycursor.execute("""SELECT FOOD.* FROM 
         ((FOOD JOIN `FOOD_INVOIC` ON FOODfoodid = foodid)
-        JOIN INVOIC ON INVOICEinvoiceid = invoiceid)
+        JOIN INVOIC ON INVOICinvoiceid = invoiceid)
         JOIN USER ON USER.WALLETwalletid = INVOIC.WALLETwalletid
         WHERE USER.userid = %s AND FOOD.SHOPshopid = %s""", (str(user_id), str(shop_id),))
         return self._mycursor.fetchall()
@@ -401,3 +401,7 @@ class SnapFoodDB:
 
     def close(self):
         self._mydb.close()
+
+db = SnapFoodDB()
+print(db.showOrderByShop(4,3))
+db.close()
