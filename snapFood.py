@@ -318,12 +318,12 @@ class SnapFoodDB:
         self._mycursor.execute(sql, vals)
         return self._mycursor.fetchall()
 
-    def searchFood(self, price_l = None, price_h = None, about = None, name = None, discount = None, category = None):
+    def searchFood(self, price_l = None, price_h = None, name = None, discount = None, category_id = None):
         sql = """SELECT FOOD.foodid, FOOD.name, FOOD.price, FOOD.about, FOOD.discount, CATEGORY.name, SHOP.name, SHOP.shopid FROM 
         (FOOD JOIN CATEGORY ON FOOD.CATEGORYcategoryid = CATEGORY.categoryid) JOIN SHOP ON FOOD.SHOPshopid = SHOP.shopid """
         need_and = 0
         vals = []
-        if price_l != None or price_h != None or about != None or name != None or discount != None or category != None:
+        if price_l != None or price_h != None or name != None or discount != None or category != None:
             sql += "WHERE "
         if price_l != None:
             sql += "FOOD.price >= %s"
@@ -334,12 +334,6 @@ class SnapFoodDB:
                 sql += " AND "
             sql += "FOOD.price <= %s"
             vals.append(str(price_h))
-            need_and = 1
-        if about != None:
-            if need_and == 1:
-                sql += " AND "
-            sql += "FOOD.about LIKE (%s)"
-            vals.append("%" + str(about) + "%")
             need_and = 1
         if name != None:
             if need_and ==1:
@@ -356,8 +350,8 @@ class SnapFoodDB:
         if category != None:
             if need_and == 1:
                 sql += " AND "
-            sql += "CATEGORY.name = %s"
-            vals.append(str(category))
+            sql += "CATEGORY.categoryid = %s"
+            vals.append(str(category_id))
         sql += ";"
         self._mycursor.execute(sql, vals)
         return self._mycursor.fetchall()
@@ -384,6 +378,10 @@ class SnapFoodDB:
         self._mycursor.execute("SELECT name FROM CATEGORY WHERE categoryid = %s;", (str(category_id),))
         return self._mycursor.fetchall()
 
+    def showAllCategory(self):
+        self._mycursor.execute("SELECT * FROM CAGEGORY;")
+        return self._mycursor.fetchall()
+
     def addDiscountCodeForUser(self, user_id, code, percent=50):
         self._mycursor.execute("INSERT INTO DISCOUNT(`percent`, text) VALUES (%s, %s);", (str(percent), str(code),))
         discount_id = self._mycursor.lastrowid
@@ -403,5 +401,4 @@ class SnapFoodDB:
         self._mydb.close()
 
 db = SnapFoodDB()
-print(db.showOrderByShop(4,3))
 db.close()
