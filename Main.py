@@ -308,20 +308,24 @@ class Application:
         self.searched_resturant_screen = Tk()
         self.searched_resturant_screen.title("Results")
         tree=Treeview(self.searched_resturant_screen,style="mystyle.Treeview")
-        tree["columns"]=("one","two","three")
+        tree["columns"]=("one","two","three", "four")
         #set tree columns
         tree.column("#0", width=270, minwidth=270, stretch=tk.NO)
         tree.column("one", width=150, minwidth=150, stretch=tk.NO)
         tree.column("two", width=400, minwidth=200)
         tree.column("three", width=80, minwidth=50, stretch=tk.YES)
+        tree.column("four", width=80, minwidth=50, stretch=tk.YES)
         #set tree's heading
         tree.heading("#0",text="Name",anchor=tk.W)
         tree.heading("one", text="About",anchor=tk.W)
         tree.heading("two", text="min bill value",anchor=tk.W)
         tree.heading("three", text="address",anchor=tk.W)
+        tree.heading("four", text="Rate",anchor=tk.W)
         list_of_resturant_in_treeview = []
         for i in range(len(resturants)):
-            resturant_in_treeview = tree.insert("", i+1, text=resturants[i][1], values=(resturants[i][2], resturants[i][3], self.make_address_str(resturants[i][4])))
+            rate = mydb.calculateRate(resturants[i][0])
+            resturant_in_treeview = tree.insert("", i+1, text=resturants[i][1], values=(resturants[i][2], resturants[i][3], 
+            self.make_address_str(resturants[i][4]), "--" if rate[0][0] == None else rate[0][0]))
             list_of_resturant_in_treeview.append(resturant_in_treeview)
         # for resturant in list_of_resturant_in_treeview:
         #     index = list_of_resturant_in_treeview.index(resturant)
@@ -419,12 +423,87 @@ class Application:
 
 
     def editAddresses(self):
+        def updateAddress(i, x_entry, y_entry,city_combo, street_etnry, alley_entry, plaque_entry, address_text_entry):
+
+            x = x_entry.get()
+            if (x_entry.get() == ""):
+                x = None
+            y = y_entry.get()
+
+            if (y_entry.get() == ""):
+                y = None
+  
+            if (city_combo.get() == "None"):
+                city_id = None
+            else :
+                city_id = int(city_combo.get()[0])
+            print (city_id)
+            street = street_entry.get()
+            if (street_entry.get()==""):
+                street = None
+            
+            alley = alley_entry.get()
+            if (street_entry.get()==""):
+                alley = None
+
+            plaque = plaque_entry.get()
+            if (plaque_entry.get() == ""):
+                plaque = None
+            
+            address_text = address_text_entry.get()
+            if (address_text_entry==""):
+                address_text = None
+            
+
+            mydb.updateAddress(i, x, y, city_id, street, alley, plaque, address_text)
         addresses = mydb.showUserAddress(self.user_id)
+        print (addresses)
+        print (addresses[0][0])
         self.edit_address_screen = Tk()
         self.edit_address_screen.title("Edit Address")
         for i in range(len(addresses)):
-            Label(self.edit_address_screen, text="Address #"+str(i), bg="red", width="300", height="2", font=("Calibri", 13)).pack()
-            Label(text="").pack()
+            print (i)
+            print (type(i))
+            Label(self.edit_address_screen, text="Address#"+str(i+1)).pack()
+            # show x
+            Label(self.edit_address_screen, text="Address x:").pack()
+            x_entry = Entry(self.edit_address_screen)
+            x_entry.pack()
+            # Show y
+            Label(self.edit_address_screen, text="Address y:").pack()
+            y_entry = Entry(self.edit_address_screen)
+            y_entry.pack()
+            # Show city
+            city_combo = Combobox(self.edit_address_screen)
+            cities = mydb.showAllCity()
+            cities_list = []
+            cities_list.append("None")
+            
+            for city in cities:
+                cities_list.append(str(city[0]) + " " +city[1])
+            
+            city_combo['values']= cities_list
+            city_combo.pack()
+            # Show Street
+            Label(self.edit_address_screen, text="Address Street:").pack()
+            street_entry = Entry(self.edit_address_screen)
+            street_entry.pack()
+            # Show Alley
+            Label(self.edit_address_screen, text="Address Alley:").pack()
+            alley_entry = Entry(self.edit_address_screen)
+            alley_entry.pack()
+            # Show Plaque
+            Label(self.edit_address_screen, text="Address plaque:").pack()
+            plaque_entry = Entry(self.edit_address_screen)
+            plaque_entry.pack()
+            # Show Address text
+            Label(self.edit_address_screen, text="Address Text:").pack()
+            address_text_entry = Entry(self.profile)
+            address_text_entry.pack()
+            # Change button
+            Button(self.edit_address_screen,text="Change my information", height="2", width="30", command=
+            partial(updateAddress, addresses[i][1], x_entry, y_entry,city_combo, street_entry, alley_entry, plaque_entry, address_text_entry)).pack()
+            # print (email_address_entry.get())
 
 
 
@@ -570,30 +649,28 @@ class Application:
         self.searched_resturant_screen = Tk()
         self.searched_resturant_screen.title("Results")
         tree=Treeview(self.searched_resturant_screen,style="mystyle.Treeview")
-        tree["columns"]=("one","two","three")
+        tree["columns"]=("one","two","three", "four")
         #set tree columns
         tree.column("#0", width=270, minwidth=270, stretch=tk.NO)
         tree.column("one", width=150, minwidth=150, stretch=tk.NO)
         tree.column("two", width=400, minwidth=200)
-        tree.column("three", width=80, minwidth=50, stretch=tk.YES)
+        tree.column("three", width=400, minwidth=200, stretch=tk.YES)
+        tree.column("four", width=80, minwidth=50, stretch=tk.YES)
+
         #set tree's heading
         tree.heading("#0",text="Name",anchor=tk.W)
         tree.heading("one", text="About",anchor=tk.W)
         tree.heading("two", text="min bill value",anchor=tk.W)
         tree.heading("three", text="address",anchor=tk.W)
+        tree.heading("four", text="rate",anchor=tk.W)
         list_of_resturant_in_treeview = []
         for i in range(len(resturants)):
-            resturant_in_treeview = tree.insert("", i+1, text=resturants[i][1], values=(resturants[i][2], resturants[i][3], self.make_address_str(resturants[i][4])))
+            rate = mydb.calculateRate(resturants[i][0])[0][0]
+            resturant_in_treeview = tree.insert("", i+1, text=resturants[i][1], values=(resturants[i][2], resturants[i][3], self.make_address_str(resturants[i][4]), "-" if rate== None else rate))
             list_of_resturant_in_treeview.append(resturant_in_treeview)
-        # for resturant in list_of_resturant_in_treeview:
-        #     index = list_of_resturant_in_treeview.index(resturant)
-        #     shop_id = resturants[index][0]
-        #     shop_foods = mydb.showFoodsOfShop(shop_id)
-            
         tree.pack(side=tk.TOP,fill=tk.X)
         tree.bind("<Double-1>", partial(self.OnDoubleClick,tree, resturants))
 
-        #find element on double click
         
     def restaurantsPage(self):      
         self.address_selection_screen = Tk()
