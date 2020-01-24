@@ -86,7 +86,8 @@ class SnapFoodDB:
         self._mydb.commit()
 
     def updateAddress(self, address_id, x = None, y = None, city_id = None, street = None, alley = None, plaque = None, address_text = None):
-        self._mycursor.execute("SELECT x, y, cityid, street, alley, plaque, address_text, locationid  FROM ADDRESS JOIN CITY ON ADDRESS.CITYcityid = CITY.cityid JOIN LOCATION ON ADDRESSaddressid = addressid WHERE ADDRESS.USERuserid = %s", (user_id))
+        self._mycursor.execute("""SELECT x, y, cityid, street, alley, plaque, `address-text`, locationid  FROM ADDRESS JOIN CITY ON ADDRESS.CITYcityid = CITY.cityid 
+        JOIN LOCATION ON ADDRESSaddressid = addressid WHERE addressid = %s""", (str(address_id),))
         data = self._mycursor.fetchall()[0]
         location_id = data[7]
         if x == None:
@@ -389,7 +390,7 @@ class SnapFoodDB:
         self._mydb.commit()
         return discount_id
 
-    def charging(self, user_id, amount):  #NOT CHECKED
+    def charging(self, user_id, amount):
         self._mycursor.execute("SELECT balance, walletid FROM WALLET JOIN USER ON WALLETwalletid = walletid WHERE userid = %s;",(str(user_id),))
         data = self._mycursor.fetchall()[0]
         balance = int(data[0])
@@ -409,11 +410,11 @@ class SnapFoodDB:
         self._mycursor.execute("SELECT * FROM ADMIN WHERE username = %s", (str(username),))
         return self._mycursor.fetchall()
 
-    def deleteFood(self, food_id):  #NOT CHECKED
+    def deleteFood(self, food_id):
         self._mycursor.execute("DELETE FROM FOOD WHERE foodid = %s;", (str(food_id),))
         self._mydb.commit() 
 
-    def updateFood(self, food_id, price = "", about = "", name = "", discount = "", category_id = "", image = ""):   #NOT CHECKED
+    def updateFood(self, food_id, price = "", about = "", name = "", discount = "", category_id = "", image = ""):
         self._mycursor.execute("SELECT * FROM FOOD WHERE foodid = %s;", (str(food_id),))
         data = self._mycursor.fetchall()[0]
         if price == "":
@@ -429,7 +430,7 @@ class SnapFoodDB:
         if image == "":
             image = data[5]
         self._mycursor.execute("UPDATE FOOD SET price = %s, about = %s, name = %s, discount = %s, image = %s, CATEGORYcategoryid = %s WHERE foodid = %s;"
-        .format(str(price), str(about), str(name), str(discount), str(image), str(category_id), str(food_id),))
+        , (str(price), str(about), str(name), str(discount), str(image), str(category_id), str(food_id),))
         self._mydb.commit()
 
     def showActiveOrder(self, shop_id):
@@ -462,13 +463,5 @@ class SnapFoodDB:
         JOIN COMMENT ON COMMENTcommentid = commentid WHERE shopid = %s;""", (str(shop_id),))
         return self._mycursor.fetchall()
 
-    def temp(self):
-        #self._mycursor.execute("UPDATE STATUS SET name = \'Prepration\' WHERE statusid = 7;")
-        self._mydb.commit()
-
     def close(self):
         self._mydb.close()
-
-db = SnapFoodDB()
-print(db.showAllComments(3))
-db.close()
