@@ -85,14 +85,28 @@ class SnapFoodDB:
         self._mycursor.execute("DELETE FROM ADDRESS WHERE addressid = \'{}\';".format(address_id))
         self._mydb.commit()
 
-    def updateAddress(self, x = None, y = None, city_id = None, street = None, alley = None, plaque = None, address_text = None):
-        data = self.showAddress(address_id)
-        #if x == None:
-        #if x == None:
-        #if x == None:
-        #if x == None:
-        #if x == None:
-        #if x == None:
+    def updateAddress(self, address_id, x = None, y = None, city_id = None, street = None, alley = None, plaque = None, address_text = None):
+        self._mycursor.execute("SELECT x, y, cityid, street, alley, plaque, address_text, locationid  FROM ADDRESS JOIN CITY ON ADDRESS.CITYcityid = CITY.cityid JOIN LOCATION ON ADDRESSaddressid = addressid WHERE ADDRESS.USERuserid = \'{}\'".format(user_id))
+        data = self._mycursor.fetchall()[0]
+        location_id = data[7]
+        if x == None:
+            x = data[0]
+        if y == None:
+            y = data[1]
+        if city_id == None:
+            city_id = data[2]
+        if street == None:
+            street = data[3]
+        if alley == None:
+            alley = data[4]
+        if plaque == None:
+            plaque = data[5]
+        if address_text == None:
+            address_text = data[6]
+        self._mycursor.execute("UPDATE ADDRESS SET street = \'{}\', alley = \'{}\', plaque = \'{}\', `address-text` = \'{}\', CITYcityid = \'{}\' WHERE addressid = \'{}\';"
+        .format(street, alley, plaque, address_text, city_id, address_id))
+        self._mycursor.execute("UPDATE LOCATION SET x = \'{}\', y = \'{}\' WHERE locationid = \'{}\';".format(x, y, location_id))
+        self._mydb.commit()
 
     def searchShopByLocation(self, address_id, radius):
         self._mycursor.execute("SELECT * FROM LOCATION WHERE ADDRESSaddressid = \'{}\';".format(address_id))
@@ -212,6 +226,9 @@ class SnapFoodDB:
     def addComment(self, invoic_id, rate, text = None): #NOT CHECKED
         self._mycursor.execute("INSERT INTO COMMENT(rate, text) VALUES (\'{}\', \'{}\');".format(rate, text))
         comment_id = self._mycursor.lastrowid
+        self._mycursor.execute("SELECT COMMENTcommentid FROM INVOIC WHERE invoiceid = \'{}\';".format(invoic_id))
+        last_comment_id = int(self._mycursor.fetchall()[0][0])
+        self._mycursor.execute("DELETE FROM COMMENT WHERE commentid = \'{}\';".format(last_comment_id))
         self._mycursor.execute("UPDATE INVOIC SET COMMENTcommentid = \'{}\' WHERE invoiceid = \'{}\';""".format(comment_id,invoic_id))
         self._mydb.commit()
         return comment_id
@@ -359,5 +376,4 @@ class SnapFoodDB:
         self._mydb.close()
 
 db = SnapFoodDB()
-db.temp()
 db.close()
