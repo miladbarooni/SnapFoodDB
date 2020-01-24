@@ -146,10 +146,6 @@ class Application:
         else:
             messagebox.showinfo('Repeat password again', 'your repeated password doesn\'n match your entered password, Try Again')
 
-        # print (username_entry.get())
-        # print (password_entry.get())
-        # print (firstname_entry.get())
-    
 
 
     def dashboardPage(self):
@@ -157,7 +153,7 @@ class Application:
         self.login_screen.destroy
         self.dashboard = Tk()
         self.dashboard.title("User Dashboard")
-        self.dashboard.geometry("300x300")
+        self.dashboard.geometry("300x350")
 
         Label(self.dashboard, text="Select Your Choice", bg="blue", width="300", height="2", font=("Calibri", 13)).pack()
         Label(text="").pack()
@@ -167,10 +163,24 @@ class Application:
         Label(text="").pack()
         Button(self.dashboard,text="Order", height="2", width="30", command=self.orderPage).pack()
         Button(self.dashboard,text="Search", height="2", width="30", command=self.searchFoodOrShop).pack()
+        Button(self.dashboard,text="Charge your wallet", height="2", width="30", command=self.chargeWallet).pack()
         
         closeButton = Button(self.dashboard, text="Exit", command=self.dashboard.destroy, width="200", height="2")
         closeButton.pack()
 
+    def chargeWallet(self):
+        def charging(charge_wallet_entry):
+            mydb.charging(self.user_id, int(charge_wallet_entry.get()))
+        self.charge_wallet_screen = Tk()
+        self.charge_wallet_screen.title("charging")
+        Label(self.charge_wallet_screen, text="Enter A number to charge your wallet", bg="blue", width="300", height="2", font=("Calibri", 13)).pack()
+        Label(text="").pack()
+        Label(self.charge_wallet_screen, text="Just Numbers")
+        charge_wallet_entry = Entry(self.charge_wallet_screen)
+        charge_wallet_entry.pack()
+        Button(self.charge_wallet_screen, text="Charge My Wallet", command=partial(charging, charge_wallet_entry)).pack()
+
+        
 
     def searchFoodOrShop(self):
         self.search_screen = Tk()
@@ -726,8 +736,9 @@ class Application:
             tree.heading("three", text="Status",anchor=tk.W)
             tree.heading("four", text="Foods",anchor=tk.W)
             invoic_dict = {}
+            print(all_history)
             for history in all_history:
-                if ((history[0],history[1],history[2]) in invoic_dict.keys()):
+                if ((history[0],history[1],history[2], history[4]) in invoic_dict.keys()):
                     invoic_dict[(history[0],history[1],history[2], history[4])].append(history[3])
                 else:
                     invoic_dict[(history[0],history[1],history[2], history[4])] = []
@@ -763,6 +774,7 @@ class Application:
         Label(self.order_screen, text="Your All Orders", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
         Label(text="").pack()
         Button(self.order_screen,text="All Orders", height="2", width="30", command=showAllOrders).pack()
+
 root = Tk()
 my_gui = Application(root)
 root.mainloop()
