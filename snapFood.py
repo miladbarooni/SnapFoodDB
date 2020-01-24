@@ -202,7 +202,7 @@ class SnapFoodDB:
             if shop_bill_value > price - (price * discount_percent):
                 total_price += shop_bill_value
             else:
-                total_price += price - (price * discount_percent);
+                total_price += price - (price * discount_percent)
         self._mycursor.execute("SELECT balance FROM WALLET WHERE walletid = %s", (str(wallet_id),))
         balance = int(self._mycursor.fetchall()[0][0])
         self._mycursor.execute("UPDATE WALLET SET balance = %s WHERE walletid = %s;", (str(balance - total_price), str(wallet_id),))
@@ -323,7 +323,7 @@ class SnapFoodDB:
         (FOOD JOIN CATEGORY ON FOOD.CATEGORYcategoryid = CATEGORY.categoryid) JOIN SHOP ON FOOD.SHOPshopid = SHOP.shopid """
         need_and = 0
         vals = []
-        if price_l != None or price_h != None or name != None or discount != None or category != None:
+        if price_l != None or price_h != None or name != None or discount != None or category_id != None:
             sql += "WHERE "
         if price_l != None:
             sql += "FOOD.price >= %s"
@@ -347,7 +347,7 @@ class SnapFoodDB:
             sql += "FOOD.discount = %s"
             vals.append(str(discount))
             need_and = 1
-        if category != None:
+        if category_id != None:
             if need_and == 1:
                 sql += " AND "
             sql += "CATEGORY.categoryid = %s"
@@ -379,7 +379,7 @@ class SnapFoodDB:
         return self._mycursor.fetchall()
 
     def showAllCategory(self):
-        self._mycursor.execute("SELECT * FROM CAGEGORY;")
+        self._mycursor.execute("SELECT * FROM CATEGORY;")
         return self._mycursor.fetchall()
 
     def addDiscountCodeForUser(self, user_id, code, percent=50):

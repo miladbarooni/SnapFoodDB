@@ -201,25 +201,82 @@ class Application:
         Label(text="").pack()
         Label(self.search_screen, text="Enter a Low Boundery for price").pack()
         price_l_entry = Entry(self.search_screen)
+        price_l_entry.pack()
         Label(self.search_screen, text="Enter a High Boundery for price").pack()
         price_h_entry = Entry(self.search_screen)
-        Button(self.search_screen, text="Search").pack()
+        price_h_entry.pack()
+        
         Label(self.search_screen, text="Search part of a food name").pack()
         food_name_entry = Entry(self.search_screen)
+        food_name_entry.pack()
         Label(self.search_screen, text="Enter your desire discount").pack()
         discount_entry = Entry(self.search_screen)
+        discount_entry.pack()
         Label(self.search_screen, text="Choose a catogory for you desire food").pack()
         cat_combo = Combobox(self.search_screen)
-        cities = mydb.showAllCity()
-        self.number_of_cities = len(cities)
-        cities_list = []
-        
-        for i in cities:
-            cities_list.append(i[1])
-        cities_list.append("None")
-        city_combo['values']= cities_list
-        city_combo.pack()
-        city_combo.current(len(cities))
+        catogries = mydb.showAllCategory()
+        self.number_of_catogry = len(catogries)
+        catogri_list = []
+        print (catogries)
+        for i in catogries:
+            catogri_list.append(str(i[0])+ " "+ i[1])
+        catogri_list.append("None")
+        cat_combo['values']= catogri_list
+        cat_combo.pack()
+        cat_combo.current(len(catogries))  
+        Button(self.search_screen, text="Search", command=partial(self.showFoods, cat_combo, price_l_entry, price_h_entry, food_name_entry, discount_entry)).pack()
+
+    def showFoods(self, cat_cambo, price_l_entry, price_h_entry, food_name_entry, discount_entry):
+        self.search_food_screen = Tk()
+        self.search_food_screen.title("Foods")
+        price_l = price_l_entry.get()
+        if (price_l_entry.get() == ""):
+            price_l = None
+        price_h = price_h_entry.get()
+        if (price_h_entry.get() == ""):
+            price_h = None
+        food_name = food_name_entry.get()
+        if (food_name_entry.get() == ""):
+            food_name = None
+        discount = discount_entry.get()
+        if (discount_entry.get() == ""):
+            discount = None
+        cat_id = -1
+        if (cat_cambo.get()=="None"):
+            cat_id = None
+        else:
+            cat_id = cat_cambo.get()[0]
+        print (price_l)
+        print (price_h)
+        print (food_name)
+        print (discount)
+        print (cat_id)
+        foods = mydb.searchFood(price_l, price_h, food_name, discount, cat_id)
+        if (len(foods) != 0):
+            Label(self.search_food_screen, text="Result for your search", bg="red", width="300", height="2", font=("Calibri", 13)).pack()
+            Label(text="").pack()
+            tree=Treeview(self.search_food_screen,style="mystyle.Treeview")
+            tree["columns"]=("one","two","three", "four", "five", "six")
+            #set tree columns
+            tree.column("#0", width=150, minwidth=150, stretch=tk.NO)
+            tree.column("one", width=400, minwidth=200)
+            tree.column("two", width=80, minwidth=50, stretch=tk.YES)
+            tree.column("three", width=80, minwidth=50, stretch=tk.YES)
+            tree.column("four", width=80, minwidth=50, stretch=tk.YES)
+            tree.column("five", width=80, minwidth=50, stretch=tk.YES)
+            tree.column("six", width=80, minwidth=50, stretch=tk.YES)
+            #set tree's heading
+            tree.heading("#0", text="Name",anchor=tk.W)
+            tree.heading("one", text="Price",anchor=tk.W)
+            tree.heading("two", text="About",anchor=tk.W)
+            tree.heading("three", text="Category",anchor=tk.W)
+            tree.heading("four", text="Image",anchor=tk.W)
+            tree.heading("five", text="Discount",anchor=tk.W)
+            tree.heading("six", text="Resturant",anchor=tk.W)
+            tree.pack()
+            for i in range(len(foods)):
+                tree.insert("", i+1, text=foods[i][1], values=(foods[i][2], foods[i][3], foods[i][5],0, foods[i][4], foods[i][6]))
+            tree.bind("<Double-1>", partial(self.OnDoubleClickOnFood,tree, foods))
 
 
 
@@ -482,7 +539,7 @@ class Application:
         food_name = tree.item(item,"text")
         food_id = -1
         for food in foods:
-            if (food[3] == food_name):
+            if (food[1] == food_name):
                 food_id = food[0]
                 break
         #Add the food to cart
